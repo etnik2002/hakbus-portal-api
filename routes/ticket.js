@@ -25,10 +25,6 @@ router.post('/update-return-seats/:id', updateReturnSeats);
 
 router.get('/nearest', getNearestTicket);
 
-router.get('/all',ceoAccessToken, getAllTicketPagination);
-
-router.get('/all-tickets',ceoAccessToken, getAllTicket);
-
 router.post('/edit/:id',ceoAccessToken, editTicket);
 
 router.post('/delete/:id',verifyDeletionPin, deleteTicket);

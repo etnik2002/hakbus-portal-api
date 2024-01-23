@@ -28,7 +28,7 @@ router.get('/all-cities-pagination', getAllCitiesPagination);
 
 router.get('/stats', getStats);
 
-router.get('/:id', getCeoById);
+router.get('/:id',cache('5 minutes'), getCeoById);
 
 router.post('/deactivate/:id',deactivateAgency);
 
