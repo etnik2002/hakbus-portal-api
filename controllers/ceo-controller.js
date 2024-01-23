@@ -5,7 +5,7 @@ const Booking = require("../models/Booking");
 const Ceo = require("../models/Ceo");
 const City = require("../models/City");
 const Ticket = require("../models/Ticket");
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 const jwt = require("jsonwebtoken")
 
 module.exports = {

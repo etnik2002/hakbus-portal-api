@@ -1,6 +1,6 @@
 const Driver = require('../models/Driver');
 const Booking = require('../models/Booking');
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 const mongoose = require("mongoose")
 const { ObjectId } = require('mongodb');
 const moment = require('moment/moment');
