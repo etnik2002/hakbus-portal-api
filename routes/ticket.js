@@ -7,11 +7,11 @@ const cache = apicache.middleware;
 
 router.use(requestLimiter);
 
-router.get('/lines', getTicketLinesBasedOnDate);
+router.get('/lines',cache('3 minutes'), getTicketLinesBasedOnDate);
 
 router.post('/create',ceoAccessToken, registerTicket);
 
-router.get('/',cache('1 minutes'), getSearchedTickets);
+router.get('/',cache('3 minutes'), getSearchedTickets);
 
 router.get('/:id', getSingleTicket);
 

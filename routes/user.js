@@ -13,6 +13,6 @@ router.get('/:id',cache('1 minutes'), getUserProfile);
 
 router.post('/delete/:id', deleteUser);
 
-router.get('/unique/:id', getSingleUser);
+router.get('/unique/:id',cache('1 minutes'), getSingleUser);
 
 module.exports = router;

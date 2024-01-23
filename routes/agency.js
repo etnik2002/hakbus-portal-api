@@ -4,12 +4,13 @@ const { createAgency, loginAsAgency, getAll,payDebt,getSearchedTickets, deleteAg
  } = require("../controllers/agency-controller");
 const { attachmentUpload, agentUpload } = require('../helpers/multer/multer');
 const { requestLimiter } = require("../auth/limiter");
-
+const apicache = require("apicache");
+const cache = apicache.middleware;
 router.use(requestLimiter);
 
-router.get('/sales/:id', getAgencySales)
+router.get('/sales/:id',cache('1 minutes'), getAgencySales)
 
-router.get('/debt', getAgenciesInDebt);
+router.get('/debt',cache('1 minutes'), getAgenciesInDebt);
 
 router.post('/create',ceoAccessToken, createAgency);
 
@@ -23,7 +24,7 @@ router.post('/payment/confirm/:id/:agency_id', confirmBookingPayment);
 
 router.post('/attachment/send', attachmentUpload.array('attachments'), sendBookingAttachment)
 
-router.get('/ticket', getSearchedTickets)
+router.get('/ticket',cache('3 minutes'), getSearchedTickets)
 
 router.post('/create/token/:bookingID/:ticketID', createScanningToken);
 
@@ -37,7 +38,7 @@ router.post('/login', loginAsAgency);
 
 router.get('/',ceoAccessToken, getAll);
 
-router.get('/:id', getSingleAgency)
+router.get('/:id',cache('1 minutes'), getSingleAgency)
 
 router.post('/delete/:id',verifyDeletionPin, deleteAgency)
 
@@ -45,6 +46,6 @@ router.post('/edit/:id', editAgency)
 
 router.get('/tickets/:id', getAgencyTickets)
 
-router.get('/sold/:id', soldTickets)
+router.get('/sold/:id',cache('1 minutes'), soldTickets)
 
 module.exports = router;
