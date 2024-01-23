@@ -1,6 +1,6 @@
 const Booking = require('../models/Booking');
 const User = require('../models/User');
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcryptjs")
 
 module.exports = {
 
