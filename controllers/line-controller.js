@@ -20,6 +20,7 @@ module.exports = {
                 freeLuggages: req.body.freeLuggages,
                 luggagePrice: req.body.luggagePrice,
                 luggageSize: req.body.luggageSize,
+                isNk: req.body.isNk,
             })
 
             console.log(req.body)
@@ -28,6 +29,7 @@ module.exports = {
             res.status(200).json("New line created!" + newLine);
 
         } catch (error) {
+            console.log(error)
             res.status(500).json(error);
         }
     },    
@@ -40,6 +42,16 @@ module.exports = {
         res.status(500).json(error);
       }
     },
+
+    getLineTickets: async (req, res) => {
+      try {
+        const tickets = await Ticket.findOne({ lineCode: req.params.id });
+        return res.status(200).json(tickets)
+      } catch (error) {
+        return res.status(500).json(error)
+      }
+    },
+    
 
     getAllLines: async (req, res) => {
       try {

@@ -13,10 +13,7 @@ const driverSchema = mongoose.Schema({
       },
     ],
     scannedBookings: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Booking',
-      },
+      
     ],
     role: {
       type: String,

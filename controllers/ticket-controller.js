@@ -67,7 +67,7 @@ module.exports = {
       });
     } catch (error) {
       console.log(error)
-      res.status(500).json({ message: "Internal error -> " + error });
+      return res.status(500).json({ message: "Internal error -> " + error });
     }
   },
     
@@ -77,9 +77,11 @@ module.exports = {
         const ticket = await Ticket.findById(req.params.id);
         res.status(200).json(ticket);
       } catch (error) {
-        res.status(500).json(error)
+        return res.status(500).json(error)
       }
     },
+
+  
 
     getSingleTicket: async (req, res)=>{ 
       try {
@@ -119,9 +121,9 @@ module.exports = {
       getAllTicket: async (req,res) => {
         try {
           const all = await Ticket.find({}).populate('lineCode')
-          res.status(200).json(all)
+          return res.status(200).json(all)
         } catch (error) {
-          res.status(500).json({ message: "Internal error -> " + error });
+          return res.status(500).json({ message: "Internal error -> " + error });
         }
       },
 
@@ -132,7 +134,7 @@ module.exports = {
   
           res.status(200).json(all);
         } catch (error) {
-          res.status(500).json({ message: "Internal error -> " + error });
+          return res.status(500).json({ message: "Internal error -> " + error });
           
         }
       },
