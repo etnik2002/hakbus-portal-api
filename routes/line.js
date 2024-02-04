@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { verifyDeletionPin } = require("../auth/auth");
-const { createLine, getLineBookings, getSingleLineBookings,getAllLines,getLineTickets, deleteLine,getLineById, findTodaysLineTickets, editLine } = require("../controllers/line-controller");
+const { createLine, getLineBookings, getSingleLineBookings,getAllLines,getLineTickets, deleteLine,getLineById, findTodaysLineTickets, editLine, modifyLineTickets } = require("../controllers/line-controller");
 const { requestLimiter } = require("../auth/limiter");
 const apicache = require("apicache");
 const cache = apicache.middleware;
@@ -13,6 +13,8 @@ router.get('/',cache('1 minute'), getAllLines);
 router.get('/today', findTodaysLineTickets)
 
 router.get('/tickets/:id', getLineTickets)
+
+router.post('/modify/tickets', modifyLineTickets)
 
 router.get('/:id',cache('1 minute'), getLineById)
 

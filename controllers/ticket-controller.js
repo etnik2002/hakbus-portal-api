@@ -41,15 +41,8 @@ module.exports = {
   registerTicket: async (req, res) => {
     try {
       const selectedDayOfTheWeek = req.body.dayOfWeek;
-      if(!selectedDayOfTheWeek) {
-        return res.status(400).json({ success: false, message: 'Inputi i diteve te javes eshte bosh.' });
-      }
-      
-      if(!req.body.lineCode) {
-        return res.status(400).json({ success: false, message: 'Inputi i linjes eshte bosh.' });
-      }
       const line = await Line.findById(req.body.lineCode);
-
+      console.log({ selectedDayOfTheWeek })
       const ticketData = {
         lineCode: req.body.lineCode,
         time: req.body.time,
@@ -59,6 +52,7 @@ module.exports = {
         stops: req.body.stops,
       };
   
+      // console.log({stops: JSON.stringify(req.body.stops, null, 2)})
   
       const generatedTickets = await generateTicketsForNextTwoYears(ticketData || req.body.ticketData, selectedDayOfTheWeek || req.body.selectedDayOfTheWeek);
   
@@ -67,7 +61,7 @@ module.exports = {
       });
     } catch (error) {
       console.log(error)
-      return res.status(500).json({ message: "Internal error -> " + error });
+      res.status(500).json({ message: "Internal error -> " + error });
     }
   },
     
@@ -411,7 +405,7 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) =>
       ticketDate.setDate(ticketDate.getDate() + 7);
     }
   }
-
+  
   await Ticket.insertMany(tickets);
 
   return tickets;
