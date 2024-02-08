@@ -17,6 +17,12 @@ const citySchema = mongoose.Schema({
     code: {
         type: String,
     },
+    station: {
+        type: String,
+    },
+    address: {
+        type: String,
+    },
 })
 
 

@@ -109,7 +109,6 @@ module.exports = {
 
     createAgency :  async (req,res) => {
         try {
-            console.log(req.body)
             const hashedPassword = await bcrypt.hashSync(req.body.password, 10);
 
             const newAgency = new Agency({
@@ -124,11 +123,11 @@ module.exports = {
 
             await newAgency.save();
 
-            res.status(200).json(newAgency);
+            return res.status(200).json(newAgency);
 
         } catch (error) {
             console.error(error);
-            res.status(500).json(error)
+            return res.status(500).json(error)
         }
     },
 
@@ -152,9 +151,9 @@ module.exports = {
                 const token = agency.generateAuthToken(agency);
                 res.set('Authorization', `Bearer ${token}`);
 
-                res.status(200).json({ data: token, message: "logged in successfully" });
+                return res.status(200).json({ data: token, message: "logged in successfully" });
         } catch (error) {
-            res.status(500).send({  message: "Some error happened" + error });
+            return res.status(500).send({  message: "Some error happened" + error });
         }
     },
 
@@ -234,7 +233,7 @@ module.exports = {
       getSingleAgency : async (req,res) => {
         try {
             const agency = await Agency.findById(req.params.id);
-            res.status(200).json(agency)
+            return res.status(200).json(agency)
         } catch (error) {
           res.status(500).json("error -> " + error);
             
@@ -244,9 +243,9 @@ module.exports = {
       getAgencyTickets : async(req,res) => {
         try {
           const tickets = await Ticket.find({agency:req.params.id}).sort({createdAt:'desc'})
-          res.status(200).json(tickets)
+          return res.status(200).json(tickets)
         } catch (error) {
-          res.status(500).json("error -> " + error);
+          return res.status(500).json("error -> " + error);
         }
       },
 
@@ -266,9 +265,9 @@ module.exports = {
               .skip(skipCount)
               .limit(size);
           
-            res.status(200).json(soldTickets);
+            return res.status(200).json(soldTickets);
           } catch (error) {
-            res.status(500).json("error -> " + error);
+            return res.status(500).json("error -> " + error);
           }
           
       },
@@ -307,9 +306,9 @@ module.exports = {
             };
           });
       
-          res.status(200).json(result);
+          return res.status(200).json(result);
         } catch (error) {
-          res.status(500).json({ error: `Server error -> ${error.message}` });
+          return res.status(500).json({ error: `Server error -> ${error.message}` });
         }
     },
     
@@ -327,10 +326,10 @@ module.exports = {
               await Order.findByIdAndUpdate(req.params.bookingID, { $set: { isScanned: true }});
           }
 
-          res.status(200).json( "Booking scanned successfully!" );
+          return res.status(200).json( "Booking scanned successfully!" );
   
       } catch (error) {
-          res.status(500).json(error);   
+          return res.status(500).json(error);   
       }
   },
 

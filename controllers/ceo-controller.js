@@ -205,6 +205,8 @@ module.exports = {
             lat: latitude,
             lng: longitude,
             code: req.body.cityCode,
+            address: req.body.address,
+            station: req.body.station
           })
           
           console.log(newCity)
