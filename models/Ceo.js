@@ -53,6 +53,12 @@ const ceoSchema = mongoose.Schema({
         default: 'admin',
     },
     access: [String],
+    lines: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Line',
+        },
+      ],
     nrOfSeatsNotification: {
         type: Number,
     },
