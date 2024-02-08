@@ -217,6 +217,45 @@ module.exports = {
         }
       },
 
+
+      editCity: async (req,res) => {
+        try {
+          const city= await City.find({name:req.body.name})
+          if(!city) { return res.status(404).json("not found") }
+          const googleMapsUrl = req.body.mapUrl;
+
+          const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+          const match = googleMapsUrl.match(regex);
+
+          var latitude = 0;
+          var longitude = 0;
+          if (match) {
+            latitude = match[1];
+            longitude = match[2];
+
+            console.log("Latitude:", latitude);
+            console.log("Longitude:", longitude);
+          } else {
+            console.log("Coordinates not found in the URL");
+          }
+
+          const payload = {
+            name: req.body.name || city.name,
+            country: req.body.country || city.country,
+            lat: latitude || city.lat,
+            lng: longitude || city.lng,
+            code: req.body.cityCode || city.cityCode,
+            address: req.body.address || city.address,
+            station: req.body.station || city.station
+          }
+
+          const edited  = await City.findByIdAndUpdate(req.params.id, payload);
+          return res.status(201).json({ message: "Edited successfully!", before: city, after: edited })
+        } catch (error) {
+          res.status(500).send({ message: "Some error happened" + error });
+        }
+      },
+
       importCitiesFromExcel: async (req,res) => {
         try {
           console.log(req.file);
