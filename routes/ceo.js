@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { ceoAccessToken } = require("../auth/auth");
+const { ceoAccessToken, verifyCeoOrObsToken } = require("../auth/auth");
 const { createCeo, login, getStats, deactivateAgency ,activateAgency,editObserver,getObserverById, addCity, getAllCities, deleteCity, getCeoById, confirmDebtPayment, getAllObservers, deleteObs, setNrOfSeatsNotification, sendBookingToEmail, getAllCitiesPagination, changePassword, changeEmail, changePin, importCitiesFromExcel, editCity} = require("../controllers/ceo-controller");
 const { attachmentUpload, excelUpload } = require('../helpers/multer/multer');
 const { requestLimiter } = require("../auth/limiter");
@@ -10,11 +10,11 @@ router.use(requestLimiter);
 
 router.post('/attachment/send', attachmentUpload.array('attachments'), sendBookingToEmail)
 
-router.post('/create',ceoAccessToken, createCeo);
+router.post('/create',verifyCeoOrObsToken, createCeo);
 
 router.post('/login', login);
 
-router.get('/observer',ceoAccessToken, getAllObservers);
+router.get('/observer',verifyCeoOrObsToken, getAllObservers);
 
 router.get('/observer/:id', getObserverById);
 
@@ -36,7 +36,7 @@ router.post('/deactivate/:id',deactivateAgency);
 
 router.post('/activate/:id',activateAgency);
 
-router.post ('/add-city',ceoAccessToken, addCity);
+router.post ('/add-city',verifyCeoOrObsToken, addCity);
 
 // router.post ('/add-city-excel', excelUpload.single("file"), importCitiesFromExcel);
 

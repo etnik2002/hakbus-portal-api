@@ -53,12 +53,7 @@ const ceoSchema = mongoose.Schema({
         default: 'admin',
     },
     access: [String],
-    lines: [
-        {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Line',
-        },
-      ],
+    lines: [],
     nrOfSeatsNotification: {
         type: Number,
     },
@@ -71,7 +66,7 @@ const ceoSchema = mongoose.Schema({
 ceoSchema.methods.generateAuthToken = function (data) {
     data.password = undefined;
     const token = jwt.sign({ data }, process.env.OUR_SECRET, {
-        expiresIn: '7d',
+        expiresIn: '1d',
     });
 
     return token;

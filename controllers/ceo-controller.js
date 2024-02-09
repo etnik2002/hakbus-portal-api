@@ -20,7 +20,8 @@ module.exports = {
                 email: req.body.email,
                 password: hashedPassword,
                 role: req.body.role ? req.body.role : 'ceo',  
-                access: req.body.access
+                access: req.body.access,
+                lines: req.body.lines
             })
 
             await newCeo.save();

@@ -21,6 +21,7 @@ const ticketSchema = mongoose.Schema({
           lat: { type: Number },
           lng: { type: Number },
           code: { type: String },
+          address: { type: String },
         }
       ],
       to: [
@@ -31,6 +32,7 @@ const ticketSchema = mongoose.Schema({
           lat: { type: Number },
           lng: { type: Number },
           code: { type: String },
+          address: { type: String },
         }
       ],
       time: { type: String },

@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { verifyActiveAgent, verifyDeletionPin, ceoAccessToken, verifyAgentAccessToken } = require("../auth/auth");
+const { verifyActiveAgent, verifyDeletionPin, ceoAccessToken, verifyAgentAccessToken, verifyCeoOrObsToken } = require("../auth/auth");
 const { createAgency, loginAsAgency, getAll,payDebt,getSearchedTickets, deleteAgency, editAgency, getAgenciesInDebt, confirmBookingPayment, getSingleAgency, getAgencyTickets, soldTickets, scanBooking, createScanningToken, getToken, deleteToken, sendBookingAttachment, getAgencySales, makeBookingForCustomers, applyForCollaboration, 
  } = require("../controllers/agency-controller");
 const { attachmentUpload, agentUpload } = require('../helpers/multer/multer');
@@ -12,7 +12,7 @@ router.get('/sales/:id',cache('1 minutes'), getAgencySales)
 
 router.get('/debt',cache('1 minutes'), getAgenciesInDebt);
 
-router.post('/create',ceoAccessToken, createAgency);
+router.post('/create',verifyCeoOrObsToken, createAgency);
 
 router.post('/sales/register',agentUpload.single("document"), applyForCollaboration)
 
@@ -36,7 +36,7 @@ router.post('/paydebt/:id', payDebt);
 
 router.post('/login', loginAsAgency);
 
-router.get('/',ceoAccessToken, getAll);
+router.get('/',verifyCeoOrObsToken, getAll);
 
 router.get('/:id',cache('1 minutes'), getSingleAgency)
 

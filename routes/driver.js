@@ -1,14 +1,14 @@
 const router = require("express").Router();
 const { createDriver, getAllDrivers, getDriverById, deleteDriver, scanBooking, editDriver, login } = require("../controllers/driver-controller");
 const { requestLimiter } = require("../auth/limiter");
-const { ceoAccessToken } = require("../auth/auth");
+const { ceoAccessToken, verifyCeoOrObsToken } = require("../auth/auth");
 
 router.use(requestLimiter);
 
 
-router.post('/create',ceoAccessToken, createDriver);
+router.post('/create',verifyCeoOrObsToken, createDriver);
 
-router.get('/',ceoAccessToken, getAllDrivers);
+router.get('/',verifyCeoOrObsToken, getAllDrivers);
 
 router.get('/:id', getDriverById);
 

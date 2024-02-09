@@ -29,6 +29,35 @@ module.exports = {
             return res.status(500).json({ success:false, message: "tokeni ka mbaruar, behuni logout the pastaj login" });
         }
     },
+
+    verifyCeoOrObsToken: async (req,res,next) =>{
+        try {
+            const authHeader = req.headers['authorization'] || req.headers.authorization; 
+            if (!authHeader) {
+                return res.status(401).json("No access here");
+            }
+
+            const token = authHeader.split(' ')[1];
+            if (!token) {
+                return res.status(401).json("No access here");
+            }
+
+            const user = jwt.verify(token, process.env.OUR_SECRET);
+            try {
+                if (user.data.role != 'ceo' && user.data.role != 'observer') {
+                    console.log(user.data.role);
+                    return res.status(401).json("You don't have access here!");
+                }
+                
+                next();
+            } catch (error) {
+                return res.status(401).json(`Error ncentrall`);
+            }
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ success:false, message: "tokeni ka mbaruar, behuni logout the pastaj login" });
+        }
+    },
     
     verifyActiveAgent: async (req,res,next) => {
         try {
