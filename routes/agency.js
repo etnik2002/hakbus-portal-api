@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { verifyActiveAgent, verifyDeletionPin, ceoAccessToken, verifyAgentAccessToken, verifyCeoOrObsToken } = require("../auth/auth");
-const { createAgency, loginAsAgency, getAll,payDebt,getSearchedTickets, deleteAgency, editAgency, getAgenciesInDebt, confirmBookingPayment, getSingleAgency, getAgencyTickets, soldTickets, scanBooking, createScanningToken, getToken, deleteToken, sendBookingAttachment, getAgencySales, makeBookingForCustomers, applyForCollaboration, 
+const { createAgency, loginAsAgency, getAll,payDebt,getSearchedTickets, deleteAgency, editAgency, getAgenciesInDebt, confirmBookingPayment, getSingleAgency, getAgencyTickets, soldTickets, scanBooking, createScanningToken, getToken, deleteToken, sendBookingAttachment, getAgencySales, makeBookingForCustomers, applyForCollaboration, getAgenciesInTotalDebt, 
  } = require("../controllers/agency-controller");
 const { attachmentUpload, agentUpload } = require('../helpers/multer/multer');
 const { requestLimiter } = require("../auth/limiter");
@@ -11,6 +11,8 @@ router.use(requestLimiter);
 router.get('/sales/:id',cache('1 minutes'), getAgencySales)
 
 router.get('/debt',cache('1 minutes'), getAgenciesInDebt);
+
+router.get('/totaldebt',cache('1 minutes'), getAgenciesInTotalDebt);
 
 router.post('/create',verifyCeoOrObsToken, createAgency);
 

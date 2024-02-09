@@ -138,6 +138,10 @@ module.exports = {
             if (!agency) {
                 return res.status(401).json({ message: "Invalid Email " });
             }
+
+            if(agency.isActive == false) {
+              return res.status(401).json({ message: "Akaunti nuk eshte aktiv, ju lutemi kontaktoni Hak Bus per tu riaktivizuar" });
+            }
                 
             const validPassword = await bcrypt.compare(
                 req.body.password,
@@ -271,46 +275,55 @@ module.exports = {
           }
           
       },
+
       getAgenciesInDebt: async (req, res) => {
         try {
-          const { from, to } = req.query;
-          console.log(req.query)
-
-          const agencySales = await Booking.aggregate([
-            {
-              $match: {
-                createdAt: { $gte: new Date(from), $lte: new Date(to) },
-                seller: { $ne: null },
-              },
-            },
-            {
-              $group: {
-                _id: '$seller',
-                totalSales: { $sum: '$price' }, 
-              },
-            },
-          ]);
+          const { from, to, city, id } = req.query;
+          let matchQuery = {
+            createdAt: { $gte: new Date(from), $lte: new Date(to) },
+            seller: {},
+          };
       
-
-          const agenciesInDebt = await Agency.find({ _id: { $in: agencySales.map((item) => item._id) } })
-            .select('-password')
-            .lean();
+          if (city) {
+            matchQuery['seller.city'] = city;
+          }
       
+          if (id) {
+            matchQuery['seller'] = id;
+          }
+      
+          console.log({ q: JSON.stringify(matchQuery) });
+      
+          const bookings = await Booking.find(matchQuery);
+          const agencyIds = bookings.map((booking) => booking.seller);
+      
+          const agencySales = agencyIds.reduce((acc, curr) => {
+            acc[curr] = acc[curr] ? acc[curr] + 1 : 1;
+            return acc;
+          }, {});
+      
+          const agenciesInDebt = await Agency.find({ _id: { $in: agencyIds } }).lean();
+          
           const result = agenciesInDebt.map((agency) => {
-            const agencySale = agencySales.find((item) => item._id.equals(agency._id));
-            const agencyDebt = (agencySale ? agencySale.totalSales : 0) * (agency.percentage / 100);
+            const totalSales = agencySales[agency._id] || 0;
+            const agencyDebt = totalSales * (agency.percentage / 100);
             return {
               ...agency,
-              totalSales: agencySale ? agencySale.totalSales : 0,
+              totalSales,
               debt: agencyDebt,
             };
           });
       
+          console.log({ result });
           return res.status(200).json(result);
         } catch (error) {
+          console.log(error);
           return res.status(500).json({ error: `Server error -> ${error.message}` });
         }
-    },
+      },
+      
+      
+      
     
     scanBooking : async (req,res) => {
       try {
@@ -440,6 +453,17 @@ module.exports = {
       }
 
         return res.status(200).json(uniqueTickets);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal server error' + error });
+    }
+  },
+
+  getAgenciesInTotalDebt: async (req,res)=> {
+    try {
+      const agencies = await Agency.find({ debt: { $gt: 0 } }).select('name debt');
+      console.log(agencies)
+      return res.status(200).json(agencies)
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: 'Internal server error' + error });
