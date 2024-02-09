@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { ceoAccessToken, verifyCeoOrObsToken } = require("../auth/auth");
-const { createCeo, login, getStats, deactivateAgency ,activateAgency,editObserver,getObserverById, addCity, getAllCities, deleteCity, getCeoById, confirmDebtPayment, getAllObservers, deleteObs, setNrOfSeatsNotification, sendBookingToEmail, getAllCitiesPagination, changePassword, changeEmail, changePin, importCitiesFromExcel, editCity} = require("../controllers/ceo-controller");
+const { createCeo, login, getStats, deactivateAgency, getCeoNotifications ,activateAgency,editObserver,getObserverById, addCity, getAllCities, deleteCity, getCeoById, confirmDebtPayment, getAllObservers, deleteObs, setNrOfSeatsNotification, sendBookingToEmail, getAllCitiesPagination, changePassword, changeEmail, changePin, importCitiesFromExcel, editCity} = require("../controllers/ceo-controller");
 const { attachmentUpload, excelUpload } = require('../helpers/multer/multer');
 const { requestLimiter } = require("../auth/limiter");
 const apicache = require("apicache");
@@ -31,6 +31,8 @@ router.get('/all-cities-pagination', getAllCitiesPagination);
 router.get('/stats', getStats);
 
 router.get('/:id',cache('5 minutes'), getCeoById);
+
+router.get('/notifications/:id', getCeoNotifications);
 
 router.post('/deactivate/:id',deactivateAgency);
 

@@ -275,55 +275,46 @@ module.exports = {
           }
           
       },
-
       getAgenciesInDebt: async (req, res) => {
         try {
-          const { from, to, city, id } = req.query;
-          let matchQuery = {
-            createdAt: { $gte: new Date(from), $lte: new Date(to) },
-            seller: {},
-          };
+          const { from, to } = req.query;
+          console.log(req.query)
+
+          const agencySales = await Booking.aggregate([
+            {
+              $match: {
+                createdAt: { $gte: new Date(from), $lte: new Date(to) },
+                seller: { $ne: null },
+              },
+            },
+            {
+              $group: {
+                _id: '$seller',
+                totalSales: { $sum: '$price' }, 
+              },
+            },
+          ]);
       
-          if (city) {
-            matchQuery['seller.city'] = city;
-          }
+
+          const agenciesInDebt = await Agency.find({ _id: { $in: agencySales.map((item) => item._id) } })
+            .select('-password')
+            .lean();
       
-          if (id) {
-            matchQuery['seller'] = id;
-          }
-      
-          console.log({ q: JSON.stringify(matchQuery) });
-      
-          const bookings = await Booking.find(matchQuery);
-          const agencyIds = bookings.map((booking) => booking.seller);
-      
-          const agencySales = agencyIds.reduce((acc, curr) => {
-            acc[curr] = acc[curr] ? acc[curr] + 1 : 1;
-            return acc;
-          }, {});
-      
-          const agenciesInDebt = await Agency.find({ _id: { $in: agencyIds } }).lean();
-          
           const result = agenciesInDebt.map((agency) => {
-            const totalSales = agencySales[agency._id] || 0;
-            const agencyDebt = totalSales * (agency.percentage / 100);
+            const agencySale = agencySales.find((item) => item._id.equals(agency._id));
+            const agencyDebt = (agencySale ? agencySale.totalSales : 0) * (agency.percentage / 100);
             return {
               ...agency,
-              totalSales,
+              totalSales: agencySale ? agencySale.totalSales : 0,
               debt: agencyDebt,
             };
           });
       
-          console.log({ result });
           return res.status(200).json(result);
         } catch (error) {
-          console.log(error);
           return res.status(500).json({ error: `Server error -> ${error.message}` });
         }
-      },
-      
-      
-      
+    },
     
     scanBooking : async (req,res) => {
       try {

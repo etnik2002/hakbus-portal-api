@@ -109,6 +109,26 @@ module.exports = {
         }
       },
 
+      getCeoNotifications: async (req, res) => {
+        try {
+          const ceo = await Ceo.findById(req.params.id).populate('notifications.agency_id');
+          console.log({ceo})
+          for (const notification of ceo.notifications) {
+            if (!notification.seen) {
+              notification.seen = true;
+            }
+          }
+      
+          await ceo.save();
+      
+          return res.status(200).json(ceo);
+        } catch (error) {
+          console.log(error);
+          return res.status(500).json(error);
+        }
+      },
+      
+
       getCeoById: async (req,res) => {
         try {
           const ceo = await Ceo.findById(req.params.id).populate('notifications.agency_id');
