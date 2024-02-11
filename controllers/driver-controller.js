@@ -160,18 +160,18 @@ module.exports = {
             if (!booking) {
               return res.status(401).json("Rezervimi eshte anuluar ose nuk egziston!");
             }
-      
-            const bookingDate = moment(booking?.date).format('DD-MM-YYYY');
-            if(bookingDate != date) {
-              return res.status(401).json("Data e udhtimit nuk eshte e njejte me daten e sotshme")
+            
+            if (!driver) {
+              return res.status(401).json("Ju nuk jeni i autorizuar për të skenuar këtë biletë.");
             }
 
             if(!booking.isPaid) {
               return res.status(401).json("Bileta nuk eshte paguar!");
             }
-
-            if (!driver) {
-              return res.status(401).json("Ju nuk jeni i autorizuar për të skenuar këtë biletë.");
+            
+            const bookingDate = moment(booking?.date).format('DD-MM-YYYY');
+            if(bookingDate != date) {
+              return res.status(401).json("Data e udhtimit nuk eshte e njejte me daten e sotshme")
             }
       
             const passengerIndex = booking.passengers.findIndex(p => p._id.equals(new mongoose.Types.ObjectId(passengerID)));
