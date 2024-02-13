@@ -26,7 +26,7 @@ router.post('/payment/confirm/:id/:agency_id', confirmBookingPayment);
 
 router.post('/attachment/send', attachmentUpload.array('attachments'), sendBookingAttachment)
 
-router.get('/ticket',cache('3 minutes'), getSearchedTickets)
+router.get('/ticket',cache('10 minutes'), getSearchedTickets)
 
 router.post('/create/token/:bookingID/:ticketID', createScanningToken);
 
@@ -48,6 +48,6 @@ router.post('/edit/:id', editAgency)
 
 router.get('/tickets/:id', getAgencyTickets)
 
-router.get('/sold/:id',cache('1 minutes'), soldTickets)
+router.get('/sold/:id', soldTickets)
 
 module.exports = router;
