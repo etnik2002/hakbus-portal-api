@@ -278,8 +278,7 @@ module.exports = {
       getAgenciesInDebt: async (req, res) => {
         try {
           const { from, to } = req.query;
-          console.log(req.query)
-
+          
           const agencySales = await Booking.aggregate([
             {
               $match: {
@@ -294,15 +293,16 @@ module.exports = {
               },
             },
           ]);
-      
+          
 
           const agenciesInDebt = await Agency.find({ _id: { $in: agencySales.map((item) => item._id) } })
-            .select('-password')
+            .select('-password -email -country -city -isApplicant -profit -phone -createdAt -updatedAt -company_id -vat -isActive')
             .lean();
       
           const result = agenciesInDebt.map((agency) => {
             const agencySale = agencySales.find((item) => item._id.equals(agency._id));
             const agencyDebt = (agencySale ? agencySale.totalSales : 0) * (agency.percentage / 100);
+
             return {
               ...agency,
               totalSales: agencySale ? agencySale.totalSales : 0,
