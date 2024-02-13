@@ -52,12 +52,12 @@ module.exports = {
           name: req.body.name || observer.name,
           email: req.body.email ||observer.email,
           password: hashedPassword || observer.password,
-          access:req.body.access || observer.access,
+          access: req.body.access || observer.access,
           lines: req.body.lines || observer.lines
         }
         
-        const updated = await Ceo.findByIdAndUpdate(observer._id, editPayload);
-        return res.status(200).json(updated);
+        await Ceo.findByIdAndUpdate(observer._id, editPayload);
+        return res.status(200).json("Observer saved");
       } catch (error) {
         console.error(error);
         res.status(500).json(error)
