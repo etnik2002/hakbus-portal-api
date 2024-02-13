@@ -111,7 +111,7 @@ module.exports = {
 
       getCeoNotifications: async (req, res) => {
         try {
-          const ceo = await Ceo.findById(req.params.id).populate('notifications.agency_id');
+          const ceo = await Ceo.findById(req.params.id).select('_id deletionPin notifications').populate('notifications.agency_id');
           console.log({ceo})
           for (const notification of ceo.notifications) {
             if (!notification.seen) {
@@ -339,7 +339,7 @@ module.exports = {
             const { debt } = req.body;
             const debtValue = parseFloat(debt);
             const agency = await Agency.findById(req.params.id);
-            const ceo = await Ceo.find({});
+            const ceo = await Ceo.find({}).linit(1);
 
             const paidDebt = await Agency.findByIdAndUpdate(req.params.id, { $inc: { debt: -debtValue } });
         
