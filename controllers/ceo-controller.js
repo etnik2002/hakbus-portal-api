@@ -339,7 +339,7 @@ module.exports = {
             const { debt } = req.body;
             const debtValue = parseFloat(debt);
             const agency = await Agency.findById(req.params.id);
-            const ceo = await Ceo.find({}).linit(1);
+            const ceo = await Ceo.find({}).limit(1);
 
             const paidDebt = await Agency.findByIdAndUpdate(req.params.id, { $inc: { debt: -debtValue } });
         
@@ -358,6 +358,7 @@ module.exports = {
         
             res.status(200).json(`Pagesa e borxhit per ${agency.name} me vlere ${debtValue} € u konfirmua me sukses.`);
           } catch (error) {
+            console.log(error)
             return res.status(500).json(error);
           }
       },
