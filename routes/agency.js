@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const { verifyActiveAgent, verifyDeletionPin, ceoAccessToken, verifyAgentAccessToken, verifyCeoOrObsToken } = require("../auth/auth");
-const { createAgency, loginAsAgency, getAll,payDebt,getSearchedTickets, deleteAgency, editAgency, getAgenciesInDebt, confirmBookingPayment, getSingleAgency, getAgencyTickets, soldTickets, scanBooking, createScanningToken, getToken, deleteToken, sendBookingAttachment, getAgencySales, makeBookingForCustomers, applyForCollaboration, getAgenciesInTotalDebt, 
+const { verifyActiveAgent, verifyDeletionPin, ceoAccessToken, verifyAgentAccessToken, verifyCeoOrObsToken, getCeoAndAgency } = require("../auth/auth");
+const { createAgency, loginAsAgency, getAll,payDebt, getSearchedTickets, deleteAgency, editAgency, getAgenciesInDebt, confirmBookingPayment, getSingleAgency, getAgencyTickets, soldTickets, scanBooking, createScanningToken, getToken, deleteToken, sendBookingAttachment, getAgencySales, makeBookingForCustomers, applyForCollaboration, getAgenciesInTotalDebt, getDebtFromDateToDate, 
  } = require("../controllers/agency-controller");
 const { attachmentUpload, agentUpload } = require('../helpers/multer/multer');
 const { requestLimiter } = require("../auth/limiter");
@@ -34,7 +34,7 @@ router.get('/get-token', getToken);
 
 router.post('/delete-token/:token', deleteToken);
 
-router.post('/paydebt/:id', payDebt);
+router.get('/getdebt/:id', getDebtFromDateToDate);
 
 router.post('/login', loginAsAgency);
 
@@ -45,6 +45,8 @@ router.get('/:id',cache('1 minutes'), getSingleAgency)
 router.post('/delete/:id',verifyDeletionPin, deleteAgency)
 
 router.post('/edit/:id', editAgency)
+
+router.post('/paydebt',getCeoAndAgency, payDebt)
 
 router.get('/tickets/:id', getAgencyTickets)
 

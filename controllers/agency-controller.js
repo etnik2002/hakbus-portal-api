@@ -369,41 +369,76 @@ module.exports = {
       }
   },
 
-  payDebt: async (req, res) => {
+  getDebtFromDateToDate: async (req, res) => {
     try {
-        const { debt } = req.body;
-        const debtValue = parseFloat(debt);
-        const agency = await Agency.findById(req.params.id);
+      let debt = 0;
+      const agency = await Agency.findById(req.params.id);
+      const bookings = await Booking.find({ 
+        seller: req.params.id, 
+        date: { 
+          $gte: req.query.from, 
+          $lte: req.query.to 
+        } 
+      }).select('price agentHasDebt');
+      
+      for (const booking of bookings) {
+        // if (booking.agentHasDebt) {
+          debt += (booking.price) - (booking.price * agency.percentage / 100);
+        // }
+      }
+      
+        // const agency = await Agency.findById(req.params.id);
 
-        if (agency.debt < 1) {
-            return res.status(403).json("Agjencioni nuk ka borxhe!");
-        }
-        if (debt < 1) {
-            return res.status(403).json("Ju lutemi shkruani nje numer valid");
-        }
-        if (debt > agency.debt) {
-            return res.status(403).json("Shuma e pageses eshte me e madhe se borxhi!");
-        }
+        // if (agency.debt < 1) {
+        //     return res.status(403).json("Agjencioni nuk ka borxhe!");
+        // }
+        // if (debt < 1) {
+        //     return res.status(403).json("Ju lutemi shkruani nje numer valid");
+        // }
+        // if (debt > agency.debt) {
+        //     return res.status(403).json("Shuma e pageses eshte me e madhe se borxhi!");
+        // }
 
         // await Agency.findByIdAndUpdate(req.params.id, { $inc: { debt: -debtValue } });
 
-        const ceo = await Ceo.find({});
-        console.log({ceo: ceo[0]})
+        // const ceo = await Ceo.find({});
+        // console.log({ceo: ceo[0]})
+        // const newNotification = {
+        //     message: `${agency.name} po paguan borxh prej ${debt} €. Borxhi duhet te konfirmohet ne menyre qe te perditesohet ne dashboardin e agjencionit`,
+        //     title: `Pagese borxhi`,
+        //     agency_id: agency._id,
+        //     value: debtValue,
+        //     confirmed: false,
+        // };
+        
+        // await Ceo.findByIdAndUpdate(ceo[0]._id, { $push: { notifications: newNotification } });
+        return res.status(200).json(debt);
+
+    } catch (error) {
+        return res.status(500).json(error);
+    }
+
+  },
+
+  payDebt: async (req,res) => {
+    try {
+        const ceo = await Ceo.find({}).limit(1);
+        const agency = req.agent.data;
+        console.log({ceo, agency})
         const newNotification = {
-            message: `${agency.name} po paguan borxh prej ${debt} €. Borxhi duhet te konfirmohet ne menyre qe te perditesohet ne dashboardin e agjencionit`,
+            message: `${agency.name} po paguan borxh prej 1234567 €. Borxhi duhet te konfirmohet ne menyre qe te perditesohet ne dashboardin e agjencionit`,
             title: `Pagese borxhi`,
             agency_id: agency._id,
-            value: debtValue,
+            value: 123,
             confirmed: false,
         };
         
         await Ceo.findByIdAndUpdate(ceo[0]._id, { $push: { notifications: newNotification } });
-        res.status(200).json("Kerkesa per pages te borxhit u dergua tek HakBus, konfirmimi do te behet nga ana e kompanise pasi qe ju ti dergoni parate. Ju faleminderit?");
-
+        return res.status(200).json("debt paid")
     } catch (error) {
-        res.status(500).json(error);
+      console.log(error)
+      return res.status(500).json(error);
     }
-
   },
 
   getSearchedTickets : async (req, res) => {
@@ -530,6 +565,7 @@ module.exports = {
           price: passengerPrice,
           numberOfLuggages: passenger.numberOfLuggages,
           luggagePrice: ticket?.lineCode?.luggagePrice * passenger.numberOfLuggages,
+          agentHasDebt: false
         };
       });
       

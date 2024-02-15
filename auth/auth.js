@@ -124,6 +124,41 @@ module.exports = {
             console.log(error);
             return res.status(500).json("Internal Server Error");
         }
-    }
+    },
+
+    getCeoAndAgency: async (req,res,next) => {
+        try {
+            console.log(req.headers)
+            const agencyAuthHeader = req.headers['authorization']; 
+            if (!agencyAuthHeader) {
+                return res.status(401).json("No agent token found");
+            }
+
+            const agentToken = agencyAuthHeader.split(' ')[1];
+            if (!agentToken) {
+                return res.status(401).json("No agent token here");
+            }
+
+            const agent = jwt.verify(agentToken, process.env.OUR_SECRET);
+
+            // const ceoAuthHeader = req.headers['ceo-authorization']; 
+            // if (!ceoAuthHeader) {
+            //     return res.status(401).json("No ceo token found");
+            // }
+
+            // const ceoToken = ceoAuthHeader.split(' ')[1];
+            // if (!ceoToken) {
+            //     return res.status(401).json("No ceo token here");
+            // }
+
+            // const ceo = jwt.verify(agentToken, process.env.OUR_SECRET);
+            // req.ceo = ceo;
+            req.agent = agent;
+            next();
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json("Internal Server Error");
+        }
+    },
 
 };
