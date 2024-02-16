@@ -47,7 +47,8 @@ const ceoSchema = mongoose.Schema({
             },
             seen: {
                 type: Boolean,
-            }
+            },
+            additionalData: []
         },
     ],
     role: {

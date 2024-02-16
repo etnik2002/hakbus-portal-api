@@ -283,6 +283,7 @@ module.exports = {
             {
               $match: {
                 createdAt: { $gte: new Date(from), $lte: new Date(to) },
+                agentHasDebt: true,
                 seller: { $ne: null },
               },
             },
@@ -301,8 +302,7 @@ module.exports = {
       
           const result = agenciesInDebt.map((agency) => {
             const agencySale = agencySales.find((item) => item._id.equals(agency._id));
-            const agencyDebt = (agencySale ? agencySale.totalSales : 0) * (agency.percentage / 100);
-
+            const agencyDebt = (agencySale ? agencySale.totalSales : 0) - (agencySale.totalSales * agency.percentage / 100);
             return {
               ...agency,
               totalSales: agencySale ? agencySale.totalSales : 0,
@@ -372,47 +372,25 @@ module.exports = {
   getDebtFromDateToDate: async (req, res) => {
     try {
       let debt = 0;
+      let bookingIDS = [];
       const agency = await Agency.findById(req.params.id);
       const bookings = await Booking.find({ 
         seller: req.params.id, 
-        date: { 
+        createdAt: { 
           $gte: req.query.from, 
           $lte: req.query.to 
-        } 
+        },
+        agentHasDebt: true
       }).select('price agentHasDebt');
       
+      console.log({bookings})
+
       for (const booking of bookings) {
-        // if (booking.agentHasDebt) {
           debt += (booking.price) - (booking.price * agency.percentage / 100);
-        // }
+          bookingIDS.push(booking?._id)
       }
       
-        // const agency = await Agency.findById(req.params.id);
-
-        // if (agency.debt < 1) {
-        //     return res.status(403).json("Agjencioni nuk ka borxhe!");
-        // }
-        // if (debt < 1) {
-        //     return res.status(403).json("Ju lutemi shkruani nje numer valid");
-        // }
-        // if (debt > agency.debt) {
-        //     return res.status(403).json("Shuma e pageses eshte me e madhe se borxhi!");
-        // }
-
-        // await Agency.findByIdAndUpdate(req.params.id, { $inc: { debt: -debtValue } });
-
-        // const ceo = await Ceo.find({});
-        // console.log({ceo: ceo[0]})
-        // const newNotification = {
-        //     message: `${agency.name} po paguan borxh prej ${debt} €. Borxhi duhet te konfirmohet ne menyre qe te perditesohet ne dashboardin e agjencionit`,
-        //     title: `Pagese borxhi`,
-        //     agency_id: agency._id,
-        //     value: debtValue,
-        //     confirmed: false,
-        // };
-        
-        // await Ceo.findByIdAndUpdate(ceo[0]._id, { $push: { notifications: newNotification } });
-        return res.status(200).json(debt);
+      return res.status(200).json({data: parseFloat(debt.toFixed(2)), bookingIDS: bookingIDS});
 
     } catch (error) {
         return res.status(500).json(error);
@@ -424,16 +402,36 @@ module.exports = {
     try {
         const ceo = await Ceo.find({}).limit(1);
         const agency = req.agent.data;
-        console.log({ceo, agency})
+        const { debt, bookingIDS } = req.body;
+        const { from, to } = req.query; 
+        console.log({bookingIDS, debt})
+
+        if (agency.debt < 1) {
+            return res.status(403).json("Agjencioni nuk ka borxhe!");
+        }
+        if (debt < 1) {
+            return res.status(403).json("Ju lutemi shkruani nje numer me te madh se 0");
+        }
+        // if (debt > agency.debt) {
+        //     return res.status(403).json("Shuma e pageses eshte me e madhe se borxhi!");
+        // }
+
         const newNotification = {
-            message: `${agency.name} po paguan borxh prej 1234567 €. Borxhi duhet te konfirmohet ne menyre qe te perditesohet ne dashboardin e agjencionit`,
+            message: `${agency.name} po paguan borxh prej ${debt} € per datat 
+            ${from} deri ${to}. Borxhi duhet te konfirmohet ne menyre qe te perditesohet ne dashboardin e agjencionit`,
             title: `Pagese borxhi`,
             agency_id: agency._id,
-            value: 123,
+            value: debt,
             confirmed: false,
+            additionalData: bookingIDS
         };
         
         await Ceo.findByIdAndUpdate(ceo[0]._id, { $push: { notifications: newNotification } });
+        // await Agency.findByIdAndUpdate(agency._id, { $inc: { debt: -debt } });
+        // for (const id of bookingIDS) {
+        //   await Booking.findByIdAndUpdate(id, { $set: { agenyHasDebt: false } });
+        // }
+
         return res.status(200).json("debt paid")
     } catch (error) {
       console.log(error)
@@ -560,12 +558,11 @@ module.exports = {
           email: passenger.email,
           phone: passenger.phone,
           fullName: passenger.fullName,
-          birthDate: passenger.birthdate,
+          birthDate: passenger.birthDate,
           age: calculateAge(passenger.birthDate),
           price: passengerPrice,
           numberOfLuggages: passenger.numberOfLuggages,
           luggagePrice: ticket?.lineCode?.luggagePrice * passenger.numberOfLuggages,
-          agentHasDebt: false
         };
       });
       
@@ -584,7 +581,8 @@ module.exports = {
         toCode: req.body.to.code,
         price: totalPrice,
         passengers: passengers,
-        isPaid: detectPayment(ticket, req.body.isPaid)
+        isPaid: detectPayment(ticket, req.body.isPaid),
+        agentHasDebt: true
       })
 
 
