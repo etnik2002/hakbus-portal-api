@@ -221,15 +221,39 @@ module.exports = {
               }
             },
             {
-              $sort: { date: 1 },
+              $unwind: "$stops" 
             },
             {
-              $skip: skipCount,
+              $match: {
+                "stops.from.code": req.query.from,
+                "stops.to.code": req.query.to
+              }
             },
             {
-              $limit: size,
+              $sort: { date: 1 }
             },
-          ])
+            {
+              $skip: skipCount
+            },
+            {
+              $limit: size
+            },
+            {
+              $group: {
+                _id: "$_id",
+                lineCode: { $first: "$lineCode" },
+                from: { $first: "$from" },
+                to: { $first: "$to" },
+                date: { $first: "$date" },
+                time: { $first: "$time" },
+                type: { $first: "$type" },
+                numberOfTickets: { $first: "$numberOfTickets" },
+                isActive: { $first: "$isActive" },
+                stops: { $push: "$stops" } 
+              }
+            }
+          ]);
+          
 
 
           // const filteredTickets = uniqueTickets.filter((ticket) => {

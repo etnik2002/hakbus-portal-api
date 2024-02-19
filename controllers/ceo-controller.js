@@ -240,27 +240,25 @@ module.exports = {
       },
 
 
-      editCity: async (req,res) => {
+      editCity: async (req, res) => {
         try {
-          const city= await City.find({name:req.body.name})
-          if(!city) { return res.status(404).json("not found") }
+          const city = await City.findById(req.params.id);
+          if (!city) {
+            return res.status(404).json({ message: "City not found" });
+          }
+      
           const googleMapsUrl = req.body.mapUrl;
-
           const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
           const match = googleMapsUrl.match(regex);
-
-          var latitude = 0;
-          var longitude = 0;
+          let latitude = 0;
+          let longitude = 0;
           if (match) {
             latitude = match[1];
             longitude = match[2];
-
-            console.log("Latitude:", latitude);
-            console.log("Longitude:", longitude);
           } else {
             console.log("Coordinates not found in the URL");
           }
-
+      
           const payload = {
             name: req.body.name || city.name,
             country: req.body.country || city.country,
@@ -269,15 +267,53 @@ module.exports = {
             code: req.body.cityCode || city.cityCode,
             address: req.body.address || city.address,
             station: req.body.station || city.station
-          }
+          };
+      
+          if(latitude && longitude) {
 
-          const edited  = await City.findByIdAndUpdate(req.params.id, payload);
-          return res.status(201).json({ message: "Edited successfully!", before: city, after: edited })
+            const today = new Date();
+            const tickets = await Ticket.find({
+            $or: [
+              { "stops.from.code": city.code },
+              { "stops.to.code": city.code },
+            ],
+            // date: { $gte: today }
+          });
+          
+          console.log({tickets, today});
+
+          const ticketUpdates = tickets?.map(async (ticket) => {
+            if (ticket.stops) {
+                ticket.stops.forEach((stop) => { 
+                    const fromIndex = stop.from.findIndex((s) => s.code === city.code);
+                    if (fromIndex !== -1) {
+                        console.log("inside from");
+                        stop.from[fromIndex] = { [stop.city]: payload.name,[stop.code]: payload.code, ...stop.from[fromIndex], ...payload };
+                    }
+                    const toIndex = stop.to.findIndex((s) => s.code === city.code);
+                    if (toIndex !== -1) {
+                        console.log("inside to");
+                        stop.to[toIndex] = { [stop.city]: payload.name,[stop.code]: payload.code, ...stop.to[toIndex], ...payload };
+                      }
+                });
+                await ticket.save();
+            }
+        });
+        
+        
+          
+          await Promise.all(ticketUpdates);
+        }
+          
+          const edited = await City.findByIdAndUpdate(req.params.id, payload, { new: true });
+          return res.status(201).json({ message: "Edited successfully!", before: city, after: edited });
         } catch (error) {
-          res.status(500).send({ message: "Some error happened" + error });
+          console.error(error);
+          return res.status(500).json({ message: "Some error happened" });
         }
       },
-
+      
+      
       importCitiesFromExcel: async (req,res) => {
         try {
           console.log(req.file);
