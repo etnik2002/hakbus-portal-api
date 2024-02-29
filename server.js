@@ -77,9 +77,9 @@ if (cluster.isMaster) {
     })
   );
 
-  // mongoose.connect(process.env.DATABASE_URL)
-  //   .then(() => { console.log("Connected to database!") })
-  //   .catch((err) => { console.log("Connection failed!", err) });
+  mongoose.connect(process.env.DATABASE_URL)
+    .then(() => { console.log("Connected to database!") })
+    .catch((err) => { console.log("Connection failed!", err) });
 
   app.use('/user', userRoutes);
   app.use('/ticket', ticketRoutes);
