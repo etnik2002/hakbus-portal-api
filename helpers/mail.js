@@ -34,13 +34,14 @@ async function generateQRCode(data, passengers, destination, dateTime,dateString
       },
     };
 
- let transporter = nodemailer.createTransport({
-      service: 'gmail',
-      port: 587,
-      secure: true,
+    let transporter = nodemailer.createTransport({
+      pool: true,
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, 
       auth: {
-        user: 'hakbusticket@gmail.com',
-        pass: 'vysimrt czlp csfi fqpx',
+        user: 'etnikz2002@gmail.com',
+        pass: 'vysmnurlcmrzcwad',
       },
     });
 
@@ -63,7 +64,10 @@ async function generateQRCode(data, passengers, destination, dateTime,dateString
 
           await transporter.sendMail({
             from: 'etnikz2002@gmail.com',
-            to: passenger?.email,
+            to: {
+              name: 'Hak Bus',
+              address: passenger?.email,
+            },
             subject: 'HakBus Booking Details',
             html: `
                   <html lang="en">
@@ -201,13 +205,14 @@ async function getTicketsFromDateToDate(from, to) {
 
 async function cancelNotPaidBookingImmediately (booking) {
   try {
- let transporter = nodemailer.createTransport({
-      service: 'gmail',
-      port: 587,
-      secure: true,
+    let transporter = nodemailer.createTransport({
+      pool: true,
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, 
       auth: {
-        user: 'hakbusticket@gmail.com',
-        pass: 'vysimrt czlp csfi fqpx',
+        user: 'etnikz2002@gmail.com',
+        pass: 'vysmnurlcmrzcwad',
       },
     });
 
@@ -218,7 +223,10 @@ async function cancelNotPaidBookingImmediately (booking) {
 
     let info = await transporter.sendMail({
       from: 'etnikz2002@gmail.com', 
-      to: userEmail, 
+      to: {
+        name: 'Hak Bus',
+        address: userEmail,
+      },
       subject: 'Booking Cancelled Due to Unsuccessful Payment',
       html: `
         <html>
@@ -257,19 +265,22 @@ async function sendOrderToUsersEmail ( userEmail, ticket, buyerName, customersNa
     //   const sendToHistory = `${process.env.APIURL}/user/tickets/${userID}`;
 
     let transporter = nodemailer.createTransport({
-      host: 'smtppro.zoho.eu',
+      pool: true,
+      host: "smtp.gmail.com",
       port: 465,
-      secure: true,
+      secure: true, 
       auth: {
-        user: 'ticket@hakbus.net',
-        pass: 'VkL3ypbwnvEm',
+        user: 'etnikz2002@gmail.com',
+        pass: 'vysmnurlcmrzcwad',
       },
-     
     });
         
           let info = await transporter.sendMail({
             from: 'etnikz2002@gmail.com', 
-            to: userEmail, 
+            to: {
+              name: 'Hak Bus',
+              address: userEmail,
+            },
             subject: 'Ticket successfully purchased!',
             html: `
               <html>
@@ -490,20 +501,23 @@ async function sendOrderToUsersPhone( userPhone, ticket, userID, buyerName, cust
     try {
       console.log({passengers, attachments})
       let transporter = nodemailer.createTransport({
-        host: 'smtppro.zoho.eu',
+        pool: true,
+        host: "smtp.gmail.com",
         port: 465,
-        secure: true,
+        secure: true, 
         auth: {
-          user: 'ticket@hakbus.net',
-          pass: 'VkL3ypbwnvEm',
+          user: 'etnikz2002@gmail.com',
+          pass: 'vysmnurlcmrzcwad',
         },
-       
       });
       
       passengers.forEach(async (p, i) => {
         await transporter.sendMail({
-          from: 'etnikz2002@gmail.com', 
-          to: p.email, 
+          from: 'etnikz2002@gmail.com',
+          to: {
+            name: 'Hak Bus',
+            address: p?.email,
+          }, 
           subject: 'HakBus Booking PDF!',
           html: `
             <html>
@@ -535,14 +549,14 @@ const sendAttachmentToOneForAll = async (receiverEmail, passengers, attachments)
   try {
       console.log({ attachments });
       let transporter = nodemailer.createTransport({
-        host: 'smtppro.zoho.eu',
+        pool: true,
+        host: "smtp.gmail.com",
         port: 465,
-        secure: true,
+        secure: true, 
         auth: {
-          user: 'ticket@hakbus.net',
-          pass: 'VkL3ypbwnvEm',
+          user: 'etnikz2002@gmail.com',
+          pass: 'vysmnurlcmrzcwad',
         },
-       
       });
 
       await transporter.sendMail({
@@ -582,19 +596,25 @@ const sendAttachmentToOneForAll = async (receiverEmail, passengers, attachments)
 async function sendBookingCancellationNotification(passenger, booking) {
   try {
     let transporter = nodemailer.createTransport({
-      host: 'smtppro.zoho.eu',
+      host: 'smtp.gmail.com',
       port: 465,
       secure: true,
+      // auth: {
+      //   user: 'ticket@hakbus.net',
+      //   pass: 'VkL3ypbwnvEm',
+      // },
       auth: {
-        user: 'ticket@hakbus.net',
-        pass: 'VkL3ypbwnvEm',
+        user: 'etnikz2002@gmail.com',
+        pass: 'vysmnurlcmrzcwad',
       },
-     
     });
 
   await transporter.sendMail({
       from: 'etnikz2002@gmail.com',
-      to: passenger?.email,
+      to: {
+        name: 'Hak Bus',
+        address: passenger?.email,
+      },
       subject: 'HakBus Booking cancellation notification!',
       html: `
           <html>

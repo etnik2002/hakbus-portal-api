@@ -77,9 +77,9 @@ if (cluster.isMaster) {
     })
   );
 
-  mongoose.connect(process.env.DATABASE_URL)
-    .then(() => { console.log("Connected to database!") })
-    .catch((err) => { console.log("Connection failed!", err) });
+  // mongoose.connect(process.env.DATABASE_URL)
+  //   .then(() => { console.log("Connected to database!") })
+  //   .catch((err) => { console.log("Connection failed!", err) });
 
   app.use('/user', userRoutes);
   app.use('/ticket', ticketRoutes);
@@ -90,6 +90,35 @@ if (cluster.isMaster) {
   app.use('/line', lineRoutes);
   app.use('/notification', notificationRoutes);
 
+  // app.post('/send' ,async( req,res) => {
+  //   try {
+  //     const nodemailer = require("nodemailer")
+  //     let transporter = nodemailer.createTransport({
+  //       pool: true,
+  //       host: "smtp.gmail.com",
+  //       port: 465,
+  //       secure: true, 
+  //       auth: {
+  //         user: 'etnikz2002@gmail.com',
+  //         pass: 'vysmnurlcmrzcwad',
+  //       },
+  //     });
+
+
+  //     return await transporter.sendMail({
+  //       from: {
+  //         name: 'Hak Bus',
+  //         address: 'hakbusticket@gmail.com',
+  //       },
+  //       to: 'hakbusticket@gmail.com',
+  //       subject: 'HakBus Booking Details',
+  //       html: `test from new email`
+  //     })
+
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // })
 
   const PORT = process.env.PORT || 4461;
   app.listen(PORT, () => {
