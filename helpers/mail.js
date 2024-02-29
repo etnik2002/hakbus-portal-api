@@ -40,7 +40,7 @@ async function generateQRCode(data, passengers, destination, dateTime,dateString
       secure: true,
       auth: {
         user: 'hakbusticket@gmail.com',
-        pass: 'vysimrt czlp csfi fqpxmnurlcmrzcwad',
+        pass: 'vysimrt czlp csfi fqpx',
       },
     });
 
@@ -207,7 +207,7 @@ async function cancelNotPaidBookingImmediately (booking) {
       secure: true,
       auth: {
         user: 'hakbusticket@gmail.com',
-        pass: 'vysimrt czlp csfi fqpxmnurlcmrzcwad',
+        pass: 'vysimrt czlp csfi fqpx',
       },
     });
 
