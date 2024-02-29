@@ -34,16 +34,17 @@ async function generateQRCode(data, passengers, destination, dateTime,dateString
       },
     };
 
-    let transporter = nodemailer.createTransport({
-      host: 'smtppro.zoho.eu',
-      port: 465,
+ let transporter = nodemailer.createTransport({
+      service: 'gmail',
+      port: 587,
       secure: true,
       auth: {
-        user: 'ticket@hakbus.net',
-        pass: 'VkL3ypbwnvEm',
+        user: 'hakbusticket@gmail.com',
+        pass: 'vysimrt czlp csfi fqpxmnurlcmrzcwad',
       },
-     
     });
+
+
 
     const qrCodeBuffer = await qrcode.toBuffer(data, qrOptions);
 
@@ -200,15 +201,14 @@ async function getTicketsFromDateToDate(from, to) {
 
 async function cancelNotPaidBookingImmediately (booking) {
   try {
-    let transporter = nodemailer.createTransport({
-      host: 'smtppro.zoho.eu',
-      port: 465,
+ let transporter = nodemailer.createTransport({
+      service: 'gmail',
+      port: 587,
       secure: true,
       auth: {
-        user: 'ticket@hakbus.net',
-        pass: 'VkL3ypbwnvEm',
+        user: 'hakbusticket@gmail.com',
+        pass: 'vysimrt czlp csfi fqpxmnurlcmrzcwad',
       },
-     
     });
 
     const userEmail = [];
