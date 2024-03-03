@@ -151,48 +151,59 @@ module.exports = {
 
       getTicketLinesBasedOnDate: async (req, res) => {
         try {
-          const startDate = req.query.startDate;
-          const endDate = req.query.endDate;
-          const allBookings = await Booking.find({});
-          const allLineIDS = req.query.line.split('-');
-          console.log("req came lines")
-          let ticketsWithBookings = []; 
-          
-          for (const line of allLineIDS) {
-            if (line !== "") {
-              const line_id = new mongoose.Types.ObjectId(line);
-              console.log(line_id);
-      
-              const ticketQuery = {
-                date: { $gte: startDate, $lte: endDate },
-                lineCode: line_id
-              };
-      
-              const ticketsForLine = await Ticket.find(ticketQuery)
-                .populate('lineCode')
-                .sort({ 'date': 'asc' });
-      
-              const ticketsForLineWithBookings = ticketsForLine.map((ticket) => {
-                const bookingsForTicket = allBookings.filter(
-                  (booking) => booking.ticket.toString() === ticket._id.toString()
-                );
-                return {
-                  ticket: ticket,
-                  bookings: bookingsForTicket
-                };
-              });
-      
-              ticketsWithBookings.push(...ticketsForLineWithBookings);
+            let startDate = req.query.startDate;
+            let endDate = req.query.endDate;
+    
+            startDate = new Date(startDate);
+            endDate = new Date(endDate);
+    
+            startDate.setUTCHours(0, 0, 0, 0);
+            endDate.setUTCHours(0, 0, 0, 0);
+    
+            startDate = startDate.toISOString();
+            endDate = endDate.toISOString();
+            console.log({startDate, endDate});
+            const allBookings = await Booking.find({});
+            const allLineIDS = req.query.line.split('-');
+            console.log("req came lines")
+            let ticketsWithBookings = [];
+    
+            for (const line of allLineIDS) {
+                if (line !== "") {
+                    const line_id = new mongoose.Types.ObjectId(line);
+                    console.log(line_id);
+    
+                    const ticketQuery = {
+                        date: { $gte: startDate, $lte: endDate },
+                        lineCode: line_id
+                    };
+    
+                    const ticketsForLine = await Ticket.find(ticketQuery)
+                        .populate('lineCode')
+                        .sort({ 'date': 'asc' });
+    
+                    const ticketsForLineWithBookings = ticketsForLine.map((ticket) => {
+                        const bookingsForTicket = allBookings.filter(
+                            (booking) => booking.ticket.toString() === ticket._id.toString()
+                        );
+                        return {
+                            ticket: ticket,
+                            bookings: bookingsForTicket
+                        };
+                    });
+    
+                    ticketsWithBookings.push(...ticketsForLineWithBookings);
+                }
             }
-          }
-      
-          ticketsWithBookings.sort((a, b) => new Date(a.ticket.date) - new Date(b.ticket.date));
-          res.status(200).json(ticketsWithBookings);
+    
+            ticketsWithBookings.sort((a, b) => new Date(a.ticket.date) - new Date(b.ticket.date));
+            res.status(200).json(ticketsWithBookings);
         } catch (error) {
-          console.error(error);
-          res.status(500).json({ message: "Internal error -> " + error });
+            console.error(error);
+            res.status(500).json({ message: "Internal error -> " + error });
         }
-      },
+    },
+    
 
       getSearchedTickets: async (req,res) => {
         try {
@@ -221,39 +232,15 @@ module.exports = {
               }
             },
             {
-              $unwind: "$stops" 
+              $sort: { date: 1 },
             },
             {
-              $match: {
-                "stops.from.code": req.query.from,
-                "stops.to.code": req.query.to
-              }
+              $skip: skipCount,
             },
             {
-              $sort: { date: 1 }
+              $limit: size,
             },
-            {
-              $skip: skipCount
-            },
-            {
-              $limit: size
-            },
-            {
-              $group: {
-                _id: "$_id",
-                lineCode: { $first: "$lineCode" },
-                from: { $first: "$from" },
-                to: { $first: "$to" },
-                date: { $first: "$date" },
-                time: { $first: "$time" },
-                type: { $first: "$type" },
-                numberOfTickets: { $first: "$numberOfTickets" },
-                isActive: { $first: "$isActive" },
-                stops: { $push: "$stops" } 
-              }
-            }
-          ]);
-          
+          ])
 
 
           // const filteredTickets = uniqueTickets.filter((ticket) => {
