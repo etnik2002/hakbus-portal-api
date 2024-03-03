@@ -443,7 +443,8 @@ module.exports = {
     try {
       const fromDate =  moment(req.query.fromDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
       const toDate = moment(req.query.toDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-      
+      const currentTimeFormatted = moment(new Date()).format('HH:mm');
+
 
       const distinctTicketIds = await Ticket.distinct('_id', {
         $or: [
@@ -475,7 +476,7 @@ module.exports = {
       const filteredTickets = uniqueTickets.filter((ticket) => {
         const ticketDate = moment(findDate(ticket, req.query.from, req.query.to));
         const ticketTime = moment(findTime(ticket, req.query.from, req.query.to), 'HH:mm');
-        const currentDate = moment(currentDateFormatted);
+        const currentDate = moment(fromDate);
         const currentTime = moment(currentTimeFormatted, 'HH:mm');
       
         return ticketDate.isSame(currentDate, 'day') && ticketTime.isAfter(currentTime);
