@@ -439,63 +439,59 @@ module.exports = {
     }
   },
 
-  getSearchedTickets : async (req, res) => {
+  getSearchedTickets: async (req, res) => {
     try {
-      const fromDate =  moment(req.query.fromDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-      const toDate = moment(req.query.toDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-      const currentTimeFormatted = moment(new Date()).format('HH:mm');
+        const fromDate = moment(req.query.fromDate).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+        const toDate = moment(req.query.toDate).endOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+        const currentTimeFormatted = moment(new Date()).format('HH:mm');
 
+        const distinctTicketIds = await Ticket.distinct('_id', {
+            $or: [{
+                'stops.from.code': req.query.from,
+                'stops.to.code': req.query.to,
+            }]
+        });
 
-      const distinctTicketIds = await Ticket.distinct('_id', {
-        $or: [
-          {
-            'stops.from.code': req.query.from,
-            'stops.to.code': req.query.to,
-          }
-        ]
-      });
-
-      const query = {
-        $match: {
-          _id: { $in: distinctTicketIds },
-          date: { $gte: fromDate, $lte: toDate },
-          numberOfTickets: { $gt: 0 },
-          isActive: true
+        const query = {
+            $match: {
+                _id: { $in: distinctTicketIds },
+                date: { $gte: fromDate, $lte: toDate },
+                numberOfTickets: { $gt: 0 },
+                isActive: true
+            }
         }
-      }
-      
-      console.log(query);
 
-      const uniqueTickets = await Ticket.aggregate([
-        query,
-        {
-          $sort: { date: 1 },
-        },
-      ])
+        console.log(query);
 
-      const filteredTickets = uniqueTickets.filter((ticket) => {
-        const ticketDate = moment(findDate(ticket, req.query.from, req.query.to));
-        const ticketTime = moment(findTime(ticket, req.query.from, req.query.to), 'HH:mm');
-        const currentDate = moment(fromDate);
-        const currentTime = moment(currentTimeFormatted, 'HH:mm');
-      
-        return ticketDate.isSame(currentDate, 'day') && ticketTime.isAfter(currentTime);
-      });
-      
-                
-      const remainingTickets = uniqueTickets.filter((ticket) => !filteredTickets.includes(ticket));
-                                                  
+        const uniqueTickets = await Ticket.aggregate([
+            query,
+            {
+                $sort: { date: 1 },
+            },
+        ])
 
-      if(uniqueTickets.length == 0) {
-        return res.status(204).json("no routes found");
-      }
+        const filteredTickets = uniqueTickets.filter((ticket) => {
+            const ticketDate = moment(findDate(ticket, req.query.from, req.query.to));
+            const ticketTime = moment(findTime(ticket, req.query.from, req.query.to), 'HH:mm');
+            const currentDate = moment(fromDate);
+            const currentTime = moment(currentTimeFormatted, 'HH:mm');
+
+            return ticketDate.isSame(currentDate, 'day') && ticketTime.isAfter(currentTime);
+        });
+
+        const remainingTickets = uniqueTickets.filter((ticket) => !filteredTickets.includes(ticket));
+
+        if (uniqueTickets.length == 0) {
+            return res.status(204).json("no routes found");
+        }
 
         return res.status(200).json(remainingTickets);
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Internal server error' + error });
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' + error });
     }
-  },
+},
+
 
   getAgenciesInTotalDebt: async (req,res)=> {
     try {
