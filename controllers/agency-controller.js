@@ -557,7 +557,9 @@ module.exports = {
   makeBookingForCustomers: async (req,res) => {
     try {
       const agency = await Agency.findById(req.params.sellerID);
-      const ceo = await Ceo.aggregate([{$match: {}}]);
+      if(!agency.isActive) {
+        return res.status(401).json("Agent not active")
+      }
       const ticket = await Ticket.findById(req.params.ticketID).populate("lineCode");
       
       
