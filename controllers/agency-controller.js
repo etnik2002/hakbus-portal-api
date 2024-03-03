@@ -514,6 +514,7 @@ module.exports = {
         await generateQRCode(booking._id.toString(), booking.passengers, destination, dateTime, booking.ticket?.lineCode?.freeLuggages);
         const agencyPercentage = agency.percentage / 100;
         const agencyEarnings = (booking.price * agencyPercentage);
+        agency.profit += agencyEarnings;
         const debt = booking.price - agencyEarnings;
         agency.debt += debt;
         
