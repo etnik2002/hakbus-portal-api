@@ -472,11 +472,24 @@ module.exports = {
         },
       ])
 
+      const filteredTickets = uniqueTickets.filter((ticket) => {
+        const ticketDate = moment(findDate(ticket, req.query.from, req.query.to));
+        const ticketTime = moment(findTime(ticket, req.query.from, req.query.to), 'HH:mm');
+        const currentDate = moment(currentDateFormatted);
+        const currentTime = moment(currentTimeFormatted, 'HH:mm');
+      
+        return ticketDate.isSame(currentDate, 'day') && ticketTime.isAfter(currentTime);
+      });
+      
+                
+      const remainingTickets = uniqueTickets.filter((ticket) => !filteredTickets.includes(ticket));
+                                                  
+
       if(uniqueTickets.length == 0) {
         return res.status(204).json("no routes found");
       }
 
-        return res.status(200).json(uniqueTickets);
+        return res.status(200).json(remainingTickets);
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: 'Internal server error' + error });
