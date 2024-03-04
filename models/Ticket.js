@@ -22,6 +22,9 @@ const ticketSchema = mongoose.Schema({
           lng: { type: Number },
           code: { type: String },
           address: { type: String },
+          arrivalTime: { type: String },
+          maxBuyingTime: { type: String },
+          arrivesTomorrow: { type: Boolean },
         }
       ],
       to: [
@@ -33,6 +36,10 @@ const ticketSchema = mongoose.Schema({
           lng: { type: Number },
           code: { type: String },
           address: { type: String },
+          arrivalTime: { type: String },
+          maxBuyingTime: { type: String },
+          arrivesTomorrow: { type: Boolean },
+           
         }
       ],
       time: { type: String },
