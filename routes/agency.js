@@ -14,7 +14,7 @@ router.get('/debt',cache('1 minutes'), getAgenciesInDebt);
 
 router.get('/totaldebt',cache('1 minutes'), getAgenciesInTotalDebt);
 
-router.post('/create',verifyCeoOrObsToken, createAgency);
+router.post('/create', createAgency);
 
 router.post('/sales/register',agentUpload.single("document"), applyForCollaboration)
 
@@ -38,7 +38,7 @@ router.get('/getdebt/:id', getDebtFromDateToDate);
 
 router.post('/login', loginAsAgency);
 
-router.get('/',verifyCeoOrObsToken, getAll);
+router.get('/', getAll);
 
 router.get('/:id',cache('1 minutes'), getSingleAgency)
 
