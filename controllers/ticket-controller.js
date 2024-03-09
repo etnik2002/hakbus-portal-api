@@ -55,10 +55,11 @@ module.exports = {
       console.log({stops: req.body.stops})
   
       const generatedTickets = await generateTicketsForNextTwoYears(ticketData || req.body.ticketData, selectedDayOfTheWeek || req.body.selectedDayOfTheWeek);
-  
-      res.status(200).json({
-        generatedTickets,
-      });
+      if(!generatedTickets) {
+        return res.status(500).json("Error while creating lines")
+      }
+
+      res.status(200).json("Created");
     } catch (error) {
       console.log(error)
       res.status(500).json({ message: "Internal error -> " + error });
@@ -67,7 +68,6 @@ module.exports = {
     
     getTicketById: async (req,res) => {
       try {
-        console.log("i hini");
         const ticket = await Ticket.findById(req.params.id);
         res.status(200).json(ticket);
       } catch (error) {
@@ -141,7 +141,6 @@ module.exports = {
           const today = moment().format('DD-MM-YYYY');
 
             const allTickets = await Ticket.find({}).populate('lineCode').sort({createdAt: 'desc'})
-            console.log(today)
             res.status(200).json({allTickets,all:all.length});
         } catch (error) {
           console.log(error)
@@ -162,10 +161,8 @@ module.exports = {
     
             startDate = startDate.toISOString();
             endDate = endDate.toISOString();
-            console.log({startDate, endDate});
             const allBookings = await Booking.find({});
             const allLineIDS = req.query.line.split('-');
-            console.log("req came lines")
             let ticketsWithBookings = [];
     
             for (const line of allLineIDS) {
@@ -244,7 +241,7 @@ module.exports = {
 
 
           const filteredTickets = uniqueTickets.filter((ticket) => {
-            const ticketDate = moment(findDate(ticket, req.query.from, req.query.to));
+            const ticketDate = moment(findDate(ticket, req.query.from, req.query.to)).startOf('day');
             const ticketTime = moment(findTime(ticket, req.query.from, req.query.to), 'HH:mm');
             const currentDate = moment(currentDateFormatted);
             const currentTime = moment(currentTimeFormatted, 'HH:mm');
@@ -254,7 +251,6 @@ module.exports = {
           
                     
           const remainingTickets = uniqueTickets.filter((ticket) => !filteredTickets.includes(ticket));
-
 
           if(uniqueTickets.length == 0) {
             return res.status(204).json("no routes found");
@@ -302,7 +298,6 @@ module.exports = {
 
       editTicket: async (req, res) => {
         try {
-          console.log(req.params.id)
           const ticket = await Ticket.findById(req.params.id);
 
           if (!ticket) {
@@ -389,13 +384,19 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) =>
     let ticketDate = adjustDayOfWeek(startDate, selectedDayOfWeek);
 
     for (let i = 0; i < 2 * 52; i++) {
-      const ticketDateString = ticketDate.toISOString();
+      const ticketDateWithZeroHours = new Date(ticketDate);
+      const firstStartHour = ticketData.time.split(":")[0]
+      const firstStartMins = ticketData.time.split(":")[1]
+      ticketDateWithZeroHours.setUTCHours(parseInt(firstStartHour), parseInt(firstStartMins), 0, 0);
 
+      const ticketDateString = ticketDateWithZeroHours.toISOString();
       const ticketDataWithDate = {
         ...ticketData,
         date: ticketDateString,
       };
 
+
+      
       const stopsWithTime = ticketDataWithDate.stops.map((stop) => {
         const stopDate = new Date(ticketDateString);
         const maxBuyingTime = new Date(stopDate);

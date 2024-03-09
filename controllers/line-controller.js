@@ -75,6 +75,19 @@ module.exports = {
       }
     },  
 
+    getAllLinesNoCache: async (req, res) => {
+      try {
+        const all = await Line.aggregate([
+          { $match: {} },
+          { $sort: { createdAt: -1 } }
+        ]).exec();
+
+        return res.status(200).json(all);
+      } catch (error) {
+        return res.status(500).json("error " + error);
+      }
+    },  
+
 
     getLineBookings: async (req, res) => {
       try {
@@ -241,11 +254,47 @@ module.exports = {
           const count = result.deletedCount || 0;
   
           res.status(200).json(`${count} linja u fshijne te lidhura me ${deletedLine.code}`);
-      } catch (error) {
-          console.error(error);
-          res.status(500).json({ error: 'Internal Server Error' });
-      }
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
       },
+
+      deactivateLineTickets: async (req, res) => {
+        try {
+          if(!req.params.id) {
+            return res.status(404).json("Linja nuk u gjet")
+          }
+          await Line.findByIdAndUpdate(req.params.id, { $set: { isActive: false } })
+            const result = await Ticket.updateMany(
+                { lineCode: req.params.id }, 
+                { $set: { isActive: false } }
+            );
+            return res.status(200).json(`linjat u deaktivizuan`);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+      },
+
+      activateLineTickets: async (req, res) => {
+        try {
+            if(!req.params.id) {
+              return res.status(404).json("Linja nuk u gjet")
+            }
+            await Line.findByIdAndUpdate(req.params.id, { $set: { isActive: true } })
+            const result = await Ticket.updateMany(
+                { lineCode: new mongoose.Types.ObjectId(req.params.id) }, 
+                { $set: { isActive: false } }
+            );
+            return res.status(200).json(`linjat u aktivizuan`);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+      },
+    
+
       editLine: async (req, res) => {
         try {
           const editPayload = req.body;
@@ -259,7 +308,7 @@ module.exports = {
       
           return res.status(200).json("edited");
         } catch (error) {
-          res.status(500).json(error);
+          return res.status(500).json(error);
         }
       },
       

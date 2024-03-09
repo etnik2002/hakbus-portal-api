@@ -28,6 +28,9 @@ const LineSchema = mongoose.Schema({
     isNk: {
         type: Boolean
     },
+    isActive: {
+        type: Boolean
+    }
   }, { timestamps: true });
 
 module.exports = mongoose.model("Line", LineSchema);
