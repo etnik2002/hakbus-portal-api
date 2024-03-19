@@ -455,7 +455,7 @@ module.exports = {
         const query = {
             $match: {
                 _id: { $in: distinctTicketIds },
-                date: { $gte: fromDate, $lte: toDate },
+                date: { $gte: fromDate },
                 numberOfTickets: { $gt: 0 },
                 isActive: true
             }
