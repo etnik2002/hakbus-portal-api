@@ -441,7 +441,7 @@ module.exports = {
 
   getSearchedTickets: async (req, res) => {
     try {
-        const fromDate = moment(req.query.fromDate).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+        const fromDate = moment().startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
         const toDate = moment(req.query.toDate).endOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
         const currentTimeFormatted = moment(new Date()).format('HH:mm');
 
@@ -455,7 +455,7 @@ module.exports = {
         const query = {
             $match: {
                 _id: { $in: distinctTicketIds },
-                date: { $gte: fromDate },
+                date: { $gte: fromDate, $lte: toDate },
                 numberOfTickets: { $gt: 0 },
                 isActive: true
             }
