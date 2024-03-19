@@ -9,7 +9,7 @@ router.use(requestLimiter);
 
 router.get('/lines',cache('3 minutes'), getTicketLinesBasedOnDate);
 
-router.post('/create',verifyCeoOrObsToken, registerTicket);
+router.post('/create', registerTicket);
 
 router.get('/',cache('3 minutes'), getSearchedTickets);
 
