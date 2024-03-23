@@ -51,6 +51,19 @@ const findChildrenPrice = (ticket, from, to) => {
 };
 
 
+const findMAxBuyingTime = (ticket, from, to) => {
+  const stop = ticket?.stops?.find(
+    (s) =>
+      s.from.some((cityInfo) => cityInfo.code === from) &&
+      s.to.some((t) => t.code === to)
+  );
+  if (stop) {
+    return stop.maxBuyingTime;
+  } else {
+    return "Time not found";
+  }
+};
+
 const findTime = (ticket, from, to) => {
   const stop = ticket?.stops?.find(
     (s) =>
@@ -441,9 +454,13 @@ module.exports = {
 
   getSearchedTickets: async (req, res) => {
     try {
-        const fromDate = moment().startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-        const toDate = moment(req.query.toDate).endOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-        const currentTimeFormatted = moment(new Date()).format('HH:mm');
+        let fromDate = moment(req.query.fromDate).startOf('day').subtract(1, 'day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+        let toDate = moment(req.query.toDate).endOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+        let currentDateFormatted = moment(new Date()).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+        let currentTimeFormatted = moment(new Date()).format('HH:mm');
+        if(fromDate < currentDateFormatted) { 
+          fromDate = currentDateFormatted;
+        }
 
         const distinctTicketIds = await Ticket.distinct('_id', {
             $or: [{
@@ -461,7 +478,6 @@ module.exports = {
             }
         }
 
-        console.log(query);
 
         const uniqueTickets = await Ticket.aggregate([
             query,
@@ -471,17 +487,22 @@ module.exports = {
         ])
 
         const filteredTickets = uniqueTickets.filter((ticket) => {
-            const ticketDate = moment(findDate(ticket, req.query.from, req.query.to));
-            const ticketTime = moment(findTime(ticket, req.query.from, req.query.to), 'HH:mm');
+          const date = moment(findDate(ticket, req.query.from, req.query.to));
+          const time = findMAxBuyingTime(ticket, req.query.from, req.query.to) || findTime(ticket, req.query.from, req.query.to);
+          const [hours, minutes] = time.split(":");
+          const ticketDateTime = new Date(date);
+          console.log({date, time, ticketDateTime})
+          ticketDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
             const currentDate = moment(fromDate);
+            const finalDate = moment(ticketDateTime)
             const currentTime = moment(currentTimeFormatted, 'HH:mm');
-
-            return ticketDate.isSame(currentDate, 'day') && ticketTime.isAfter(currentTime);
+            console.log({ticketDateTime, currentDate, finalDate, currentTime, time})
+            return finalDate.isSameOrAfter(currentDate, 'day')  && currentTime.isAfter(time);
         });
 
         const remainingTickets = uniqueTickets.filter((ticket) => !filteredTickets.includes(ticket));
 
-        if (uniqueTickets.length == 0) {
+        if (remainingTickets.length == 0) {
             return res.status(204).json("no routes found");
         }
 
