@@ -497,7 +497,7 @@ module.exports = {
             const finalDate = moment(ticketDateTime)
             const currentTime = moment(currentTimeFormatted, 'HH:mm');
             console.log({ticketDateTime, currentDate, finalDate, currentTime, time})
-            return finalDate.isSameOrAfter(currentDate, 'day')  && currentTime.isAfter(time);
+            return finalDate.isSameOrAfter(currentDate, 'day')  && time < currentTime;
         });
 
         const remainingTickets = uniqueTickets.filter((ticket) => !filteredTickets.includes(ticket));
