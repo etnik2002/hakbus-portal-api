@@ -217,6 +217,8 @@ module.exports = {
     }
   },
 
+ 
+
       cancelNotPaidImmediatelyBooking: async (req,res) => {
         try {
           const deltedBooking = await Booking.findByIdAndRemove(req.params.id);
@@ -248,6 +250,43 @@ module.exports = {
           res.status(500).json({ message: `Server error -> ${error}` });
         }
       },
+
+      getSearchedBooking: async (req, res) => {
+        try {
+          const { q } = req.query;
+          let booking;
+          if (mongoose.Types.ObjectId.isValid(q)) {
+            booking = await Booking.findOne({ _id: q })
+            .populate({
+              path: 'ticket',
+              populate: { path: 'lineCode' },
+            });
+          } else {
+            booking = await Booking.findOne({
+              $or: [
+                { transaction_id: q },
+                { 'passengers.fullName': q },
+                { 'passengers.email': q }
+              ]
+            })
+            .populate({
+              path: 'ticket',
+              populate: { path: 'lineCode' },
+            });
+          }
+      
+          if (!booking || booking.length === 0) {
+            return res.status(404).json("No booking found");
+          }
+          return res.status(200).json(booking);
+        } catch (error) {
+          console.log(error);
+          return res.status(500).json({ message: `Server error -> ${error}` });
+        }
+      },
+      
+      
+      
       
       getAllBookings: async (req,res)=>{
         try {
