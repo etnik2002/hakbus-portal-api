@@ -52,16 +52,26 @@ module.exports = {
       }
     },
     
-    modifyLineTickets: async (req,res) => {
+    modifyLineTickets: async (req, res) => {
       try {
-        console.log(req.body);
-        return res.status(200).json(req.body)
+        const { stops } = req.body; 
+        console.log({stops})
+        const tickets = await Ticket.find({ lineCode: req.body.lineCode });
+    
+        for (const ticket of tickets) {
+          ticket.stops = stops; 
+          await ticket.save();
+        }
+    
+        return res.status(200).json({ message: 'Tickets updated successfully' });
       } catch (error) {
-        console.log(error)
-        return res.status(500).json(error);
+        console.log(error);
+        return res.status(500).json({ error: 'Internal server error' });
       }
     },
 
+    
+    
     getAllLines: async (req, res) => {
       try {
         const all = await Line.aggregate([
@@ -299,15 +309,28 @@ module.exports = {
         try {
           const editPayload = req.body;
           const lineId = req.params.id;
-      
           const filteredEditPayload = Object.fromEntries(
             Object.entries(editPayload).filter(([key, value]) => value !== undefined && value !== null && value != "" )
           );
-      
+
+          let currentDateFormatted = moment(new Date()).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+            
+          let tickets = [];
+          if(filteredEditPayload.modalLineChairs) {
+            tickets = await Ticket.find({ lineCode: lineId, date: { $gte: currentDateFormatted } });
+            console.log(tickets)
+          }
+          for(const ticket of tickets){
+            ticket.numberOfTickets = filteredEditPayload.modalLineChairs;
+            await ticket.save();
+          }
+
+          console.log({filteredEditPayload})
           await Line.findByIdAndUpdate(lineId, filteredEditPayload);
       
           return res.status(200).json("edited");
         } catch (error) {
+          console.log(error)
           return res.status(500).json(error);
         }
       },
