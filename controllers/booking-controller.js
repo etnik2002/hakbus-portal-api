@@ -217,7 +217,18 @@ module.exports = {
     }
   },
 
- 
+  deleteBooking: async (req,res)=>{
+    try {
+      const deletedBooking = await Booking.findByIdAndRemove(req.params.id);
+      if(!deletedBooking) {
+        return res.status(404).json("booking not found");
+      }
+
+      return res.status(200).json("booking deleted")
+    } catch (error) {
+      return res.status(500).json(error)
+    }
+  },
 
       cancelNotPaidImmediatelyBooking: async (req,res) => {
         try {
