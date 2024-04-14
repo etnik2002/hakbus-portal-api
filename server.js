@@ -40,6 +40,7 @@ if (cluster.isMaster) {
   const driverRoutes = require("./routes/driver");
   const ceoRoutes = require("./routes/ceo");
   const notificationRoutes = require("./routes/notification");
+  const docsRoutes = require("./routes/document");
   const axios = require("axios");
   var cookieParser = require('cookie-parser');
 
@@ -89,6 +90,7 @@ if (cluster.isMaster) {
   app.use('/driver', driverRoutes);
   app.use('/line', lineRoutes);
   app.use('/notification', notificationRoutes);
+  app.use('/docs', docsRoutes);
 
   // app.post('/send' ,async( req,res) => {
   //   try {
