@@ -2,6 +2,13 @@ const BusDocument = require("../models/BusDocument");
 const Bus = require("../models/Bus");
 const LicenceDocument = require("../models/LicenceDocument");
 const DriverDocument = require("../models/DriverDocument");
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+    cloud_name: process.env.cloud_name,
+    api_key: process.env.api_key,
+    api_secret: process.env.api_secret
+});
 
 
 module.exports = {
@@ -48,6 +55,7 @@ module.exports = {
 
     getBusDocuments: async (req,res) => {
         try {
+            const result = await cloudinary.uploader.upload(req.file?.path)
             const docs = await BusDocument.find({ bus: req.params.id });
             return res.status(200).json(docs)
         } catch (error) {
@@ -77,6 +85,8 @@ module.exports = {
     importBusDocument: async (req,res) => {
         try {
             const images = req.files;
+            const body = req.body;
+            console.log({images, body})
             const newDoc = new BusDocument({
                 images: images,
                 validUntil: req.body.validUntil,

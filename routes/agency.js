@@ -16,7 +16,7 @@ router.get('/totaldebt',cache('1 minutes'), getAgenciesInTotalDebt);
 
 router.post('/create', createAgency);
 
-router.post('/sales/register',agentUpload.single("document"), applyForCollaboration)
+// router.post('/sales/register',agentUpload.single("document"), applyForCollaboration)
 
 router.post('/scan/:bookingID/:agencyID', scanBooking)
 
