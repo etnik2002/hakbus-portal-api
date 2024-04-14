@@ -20,14 +20,14 @@ const cloudinaryStorage = new CloudinaryStorage({
   },
 });
 
-// const agentStorage = new CloudinaryStorage({
-//   cloudinary: cloudinary,
-//   params: {
-//       folder: 'document',
-//       format: async (req, file) => 'doc',
-//       public_id: (req, file) => Date.now() + '-' + file.originalname,
-//   },
-// });
+const docStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+      folder: 'document',
+      format: async (req, file) => 'doc',
+      public_id: (req, file) => Date.now() + '-' + file.originalname,
+  },
+});
 
 const agentStorage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -39,8 +39,8 @@ const agentStorage = multer.diskStorage({
   },
 });
 
-const agentUpload = multer({ storage: agentStorage });
+const docUpload = multer({ storage: docStorage });
 
 const attachmentUpload = multer({ storage: cloudinaryStorage });
 
-module.exports = { attachmentUpload, agentUpload };
+module.exports = { attachmentUpload, docUpload };
