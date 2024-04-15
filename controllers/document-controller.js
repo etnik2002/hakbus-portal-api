@@ -3,6 +3,7 @@ const Bus = require("../models/Bus");
 const LicenceDocument = require("../models/LicenceDocument");
 const DriverDocument = require("../models/DriverDocument");
 const cloudinary = require('cloudinary').v2;
+const moment = require("moment")
 
 cloudinary.config({
     cloud_name: process.env.cloud_name,
@@ -82,26 +83,42 @@ module.exports = {
         }
     },
 
-    importBusDocument: async (req,res) => {
+    getAllBusesDocs: async (req,res) => {
         try {
-            const images = req.files;
+            const all = await BusDocument.find({}).populate("bus");
+            return res.status(200).json(all)
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json(error);
+        }
+    },
+
+    importBusDocument: async (req, res) => {
+        try {
+            const images = req.files || req.file;
             const body = req.body;
-            console.log({images, body})
+    
+            const validUntilDate = new Date(req.body.validUntil);
+            const expiresAtDate = new Date(validUntilDate);
+            console.log({validUntilDate, expiresAtDate})
+            expiresAtDate.setDate(validUntilDate.getDate() - (parseInt(req.body.expiresAt) * 7));
+            
             const newDoc = new BusDocument({
                 images: images,
                 validUntil: req.body.validUntil,
-                expiresAt: req.body.expiresAt,
+                expiresAt: expiresAtDate, 
                 type: req.body.type,
                 bus: req.params.id,
-            })
-
+            });
+    
             await newDoc.save();
             return res.status(200).json("New bus doc saved");
         } catch (error) {
-            console.log(error);
-            return res.status(500).json(error)
+            console.log(JSON.stringify(error.response));
+            return res.status(500).json(error);
         }
     },
+    
 
     createBus: async (req,res) => {
         try {

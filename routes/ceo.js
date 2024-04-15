@@ -8,7 +8,7 @@ const cache = apicache.middleware;
 router.use(requestLimiter);
 
 
-router.post('/attachment/send', attachmentUpload.array('attachments'), sendBookingToEmail)
+// router.post('/attachment/send', attachmentUpload.array('attachments'), sendBookingToEmail)
 
 router.post('/create',verifyCeoOrObsToken, createCeo);
 

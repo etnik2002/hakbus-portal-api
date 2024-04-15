@@ -24,7 +24,7 @@ router.post('/booking/create/:sellerID/:ticketID',verifyActiveAgent, makeBooking
 
 router.post('/payment/confirm/:id/:agency_id', confirmBookingPayment);
 
-router.post('/attachment/send', attachmentUpload.array('attachments'), sendBookingAttachment)
+// router.post('/attachment/send', attachmentUpload.array('attachments'), sendBookingAttachment)
 
 router.get('/ticket',cache('10 minutes'), getSearchedTickets)
 

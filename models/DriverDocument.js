@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const driverDocumentSchema = mongoose.Schema({
     images: [],
     validUntil: { type: String },
-    expiresAt: { type: String },
+    expiresAt: { type: Date },
     type: {
         type: String,
         enum: ['leja', 'leternjoftim', 'kartelatahografis', 'licenca', 'lekarsko']
