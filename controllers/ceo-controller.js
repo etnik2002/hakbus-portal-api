@@ -269,41 +269,41 @@ module.exports = {
             station: req.body.station || city.station
           };
       
-          if(latitude && longitude) {
+          // if(latitude && longitude) {
 
-            const today = new Date();
-            const tickets = await Ticket.find({
-            $or: [
-              { "stops.from.code": city.code },
-              { "stops.to.code": city.code },
-            ],
-            // date: { $gte: today }
-          });
+          //   const today = new Date();
+          //   const tickets = await Ticket.find({
+          //   $or: [
+          //     { "stops.from.code": city.code },
+          //     { "stops.to.code": city.code },
+          //   ],
+          //   // date: { $gte: today }
+          // });
           
-          console.log({tickets, today});
+          // console.log({tickets, today});
 
-          const ticketUpdates = tickets?.map(async (ticket) => {
-            if (ticket.stops) {
-                ticket.stops.forEach((stop) => { 
-                    const fromIndex = stop.from.findIndex((s) => s.code === city.code);
-                    if (fromIndex !== -1) {
-                        console.log("inside from");
-                        stop.from[fromIndex] = { [stop.city]: payload.name,[stop.code]: payload.code, ...stop.from[fromIndex], ...payload };
-                    }
-                    const toIndex = stop.to.findIndex((s) => s.code === city.code);
-                    if (toIndex !== -1) {
-                        console.log("inside to");
-                        stop.to[toIndex] = { [stop.city]: payload.name,[stop.code]: payload.code, ...stop.to[toIndex], ...payload };
-                      }
-                });
-                await ticket.save();
-            }
-        });
+        //   const ticketUpdates = tickets?.map(async (ticket) => {
+        //     if (ticket.stops) {
+        //         ticket.stops.forEach((stop) => { 
+        //             const fromIndex = stop.from.findIndex((s) => s.code === city.code);
+        //             if (fromIndex !== -1) {
+        //                 console.log("inside from");
+        //                 stop.from[fromIndex] = { [stop.city]: payload.name,[stop.code]: payload.code, ...stop.from[fromIndex], ...payload };
+        //             }
+        //             const toIndex = stop.to.findIndex((s) => s.code === city.code);
+        //             if (toIndex !== -1) {
+        //                 console.log("inside to");
+        //                 stop.to[toIndex] = { [stop.city]: payload.name,[stop.code]: payload.code, ...stop.to[toIndex], ...payload };
+        //               }
+        //         });
+        //         await ticket.save();
+        //     }
+        // });
         
         
           
-          await Promise.all(ticketUpdates);
-        }
+        //   await Promise.all(ticketUpdates);
+        // }
           
           const edited = await City.findByIdAndUpdate(req.params.id, payload, { new: true });
           return res.status(201).json({ message: "Edited successfully!", before: city, after: edited });

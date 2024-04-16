@@ -3,7 +3,8 @@ const Bus = require("../models/Bus");
 const LicenceDocument = require("../models/LicenceDocument");
 const DriverDocument = require("../models/DriverDocument");
 const cloudinary = require('cloudinary').v2;
-const moment = require("moment")
+const moment = require("moment");
+const Driver = require("../models/Driver");
 
 cloudinary.config({
     cloud_name: process.env.cloud_name,
@@ -16,11 +17,16 @@ module.exports = {
 
     importDriverDocument: async (req,res) => {
         try {
-            const images = req.files;
+            const validUntilDate = new Date(req.body.validUntil);
+            const expiresAtDate = new Date(validUntilDate);
+            console.log({validUntilDate, expiresAtDate})
+            expiresAtDate.setDate(validUntilDate.getDate() - (parseInt(req.body.expiresAt) * 7));
+
+            const images = req.files || req.file;
             const newDoc = new DriverDocument({
                 images: images,
                 validUntil: req.body.validUntil,
-                expiresAt: req.body.expiresAt,
+                expiresAt: expiresAtDate,
                 type: req.body.type,
                 driver: req.params.id,
 
@@ -93,6 +99,16 @@ module.exports = {
         }
     },
 
+    getAllDriverDocs: async (req,res) => {
+        try {
+            const all = await DriverDocument.find({}).populate("driver");
+            return res.status(200).json(all)
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json(error);
+        }
+    },
+
     importBusDocument: async (req, res) => {
         try {
             const images = req.files || req.file;
@@ -115,6 +131,48 @@ module.exports = {
             return res.status(200).json("New bus doc saved");
         } catch (error) {
             console.log(JSON.stringify(error.response));
+            return res.status(500).json(error);
+        }
+    },
+    
+    searchBusDocument: async (req, res) => {
+        try {
+            const searchTerm = req.query.search;
+            if (!searchTerm || typeof searchTerm !== 'string') {
+                return res.status(400).json("Invalid search query");
+            }
+            const bus = await Bus.findOne({plates: searchTerm})
+            const docs = await BusDocument.find({ 'bus': bus._id }).populate('bus');
+            console.log(searchTerm, req.query);
+            
+            if (docs.length === 0) {
+                return res.status(404).json("No documents found");
+            }
+    
+            return res.status(200).json(docs);
+        } catch (error) {
+            console.error(error.message);
+            return res.status(500).json(error);
+        }
+    },
+    
+    searchDriverDocument: async (req, res) => {
+        try {
+            const searchTerm = req.query.search;
+            if (!searchTerm || typeof searchTerm !== 'string') {
+                return res.status(400).json("Invalid search query");
+            }
+            const driver = await Driver.findOne({name: searchTerm})
+            const docs = await Driver.find({ 'driver': driver._id }).populate('driver');
+            console.log(searchTerm, req.query);
+            
+            if (docs.length === 0) {
+                return res.status(404).json("No documents found");
+            }
+    
+            return res.status(200).json(docs);
+        } catch (error) {
+            console.error(error.message);
             return res.status(500).json(error);
         }
     },
