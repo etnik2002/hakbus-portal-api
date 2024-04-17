@@ -8,6 +8,10 @@ const { query } = require("express");
 const { checkForExpiredDocuments } = require("./helpers/functions/ticket");
 const BusDocument = require("./models/BusDocument");
 const numCPUs = require("os").cpus().length;
+const express = require("express");
+const app = express();
+const server = require('http').createServer(app)
+
 
 if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
@@ -24,8 +28,6 @@ if (cluster.isMaster) {
 } else {
   require("dotenv").config();
   const helmet = require("helmet");
-  const express = require("express");
-  const app = express();
   const mongoose = require("mongoose");
   const cors = require("cors");
   const moment = require("moment")
@@ -96,7 +98,7 @@ if (cluster.isMaster) {
 
 
   const WebSocket = require('ws');
-  const wss = new WebSocket.Server({ port: 8080 });
+  const wss = new WebSocket.Server({ server });
 
   wss.on('connection', function connection(ws) {
     console.log('WebSocket client connected');
@@ -125,7 +127,7 @@ if (cluster.isMaster) {
     } catch (error) {
       console.error('Error checking for expired documents:', error);
     }
-  }, 1000 * 60 * 60 * 24);
+  }, 10000);
 
   const PORT = process.env.PORT || 4461;
   app.listen(PORT, () => {
