@@ -5,6 +5,8 @@ const Booking = require("./models/Booking");
 const { sendBookingCancellationNotification } = require("./helpers/mail");
 const { log } = require("console");
 const { query } = require("express");
+const { checkForExpiredDocuments } = require("./helpers/functions/ticket");
+const BusDocument = require("./models/BusDocument");
 const numCPUs = require("os").cpus().length;
 
 if (cluster.isMaster) {
@@ -92,35 +94,38 @@ if (cluster.isMaster) {
   app.use('/notification', notificationRoutes);
   app.use('/docs', docsRoutes);
 
-  // app.post('/send' ,async( req,res) => {
-  //   try {
-  //     const nodemailer = require("nodemailer")
-  //     let transporter = nodemailer.createTransport({
-  //       pool: true,
-  //       host: "smtp.gmail.com",
-  //       port: 465,
-  //       secure: true, 
-  //       auth: {
-  //         user: 'etnikz2002@gmail.com',
-  //         pass: 'vysmnurlcmrzcwad',
-  //       },
-  //     });
 
+  const WebSocket = require('ws');
+  const wss = new WebSocket.Server({ port: 8080 });
 
-  //     return await transporter.sendMail({
-  //       from: {
-  //         name: 'Hak Bus',
-  //         address: 'hakbusticket@gmail.com',
-  //       },
-  //       to: 'hakbusticket@gmail.com',
-  //       subject: 'HakBus Booking Details',
-  //       html: `test from new email`
-  //     })
+  wss.on('connection', function connection(ws) {
+    console.log('WebSocket client connected');
+  });
 
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // })
+  setInterval(async () => {
+    try {
+      const docs = await BusDocument.find({ isAlerted: false });
+      const alertedDocs = await checkForExpiredDocuments(docs);
+  
+      if (alertedDocs.length > 0) {
+        const alertsToSend = [];
+  
+        for (const doc of alertedDocs) {
+          const updated = await BusDocument.findByIdAndUpdate(doc._id, { $set: { isAlerted: true } });
+          alertsToSend.push(updated);
+        }
+      }
+
+      wss.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({ type: 'notification', message: 'New notification', data: alertedDocs }));
+        }
+      });
+      console.log('Notifications sent');
+    } catch (error) {
+      console.error('Error checking for expired documents:', error);
+    }
+  }, 10000);
 
   const PORT = process.env.PORT || 4461;
   app.listen(PORT, () => {

@@ -11,7 +11,8 @@ const busDocumentSchema = mongoose.Schema({
     bus: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Bus"
-    }
+    },
+    isAlerted: { type: Boolean, default: false }
 })
 
 

@@ -196,7 +196,7 @@ module.exports = {
         
           await generateQRCode(newBooking._id.toString(), newBooking.passengers, destination, dateTime,new Date(dateString).toDateString(), ticket?.lineCode?.freeLuggages);
        }, 1000 * 60 * 5);
-        
+              
       var seatNotification = {};
       if (ticket.numberOfTickets <= ceo[0].nrOfSeatsNotification + 1) {
         seatNotification = {

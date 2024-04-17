@@ -4,6 +4,7 @@ const licenceDocumentSchema = mongoose.Schema({
     images: [],
     validUntil: { type: String },
     expiresAt: { type: Date },
+    isAlerted: { type: Boolean, default: false }
 
 })
 

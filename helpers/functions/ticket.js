@@ -1,3 +1,6 @@
+const moment = require("moment");
+
+
 const generateTicketsForNextTwoYears = async (ticketData, selectedDayOfWeek) => {
     const adjustDayOfWeek = (startDate, dayOfWeek) => {
         const adjustedDate = new Date(startDate);
@@ -30,4 +33,30 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDayOfWeek) => 
     return tickets;
   };
 
-  module.exports = { generateTicketsForNextTwoYears };
+  const checkForExpiredDocuments = async (docs) => {
+    try {
+        if (docs.length < 1) { 
+            return { message: "No docs found" }; 
+        }
+
+        const alertedDocs = []
+        const currentDate = moment().startOf('day');
+        docs.forEach((doc) => {
+            const docDate = moment(doc.expiresAt);
+            if (docDate.isSameOrAfter(currentDate)) { 
+                console.log("Document expired:", doc._id);
+                alertedDocs.push(doc)
+            }
+            
+            console.log("Document not expired:");
+        });
+
+        return alertedDocs;
+    } catch (error) {
+        console.error(error);
+        return JSON.stringify(error);
+    }
+}
+
+
+module.exports = { generateTicketsForNextTwoYears, checkForExpiredDocuments };

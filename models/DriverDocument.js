@@ -11,7 +11,9 @@ const driverDocumentSchema = mongoose.Schema({
     driver: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Driver"
-    }
+    },
+    isAlerted: { type: Boolean, default: false }
+
 })
 
 
