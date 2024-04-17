@@ -35,6 +35,7 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDayOfWeek) => 
 
   const checkForExpiredDocuments = async (docs) => {
     try {
+        console.log({docs})
         if (docs.length < 1) { 
             return { message: "No docs found" }; 
         }

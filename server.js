@@ -106,7 +106,7 @@ if (cluster.isMaster) {
     try {
       const docs = await BusDocument.find({ isAlerted: false });
       const alertedDocs = await checkForExpiredDocuments(docs);
-  
+      console.log({alertedDocs})
       if (alertedDocs.length > 0) {
         const alertsToSend = [];
   
@@ -125,7 +125,7 @@ if (cluster.isMaster) {
     } catch (error) {
       console.error('Error checking for expired documents:', error);
     }
-  }, 10000);
+  }, 1000 * 60 * 60 * 24);
 
   const PORT = process.env.PORT || 4461;
   app.listen(PORT, () => {
