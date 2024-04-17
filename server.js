@@ -21,7 +21,7 @@ const io = require('socket.io')(server, {
 if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
 
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
 
