@@ -44,6 +44,7 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDayOfWeek) => 
         const currentDate = moment().startOf('day');
         docs.forEach((doc) => {
             const docDate = moment(doc.expiresAt);
+            console.log({currentDate, docDate})
             if (docDate.isSameOrAfter(currentDate)) { 
                 console.log("Document expired:", doc._id);
                 alertedDocs.push(doc)

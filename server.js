@@ -1,6 +1,6 @@
 const cluster = require("cluster");
 const Ticket = require("./models/Ticket");
-const { default: fetch } = require("node-fetch");
+const fetch = require("node-fetch");
 const Booking = require("./models/Booking");
 const { sendBookingCancellationNotification } = require("./helpers/mail");
 const { log } = require("console");
@@ -10,13 +10,18 @@ const BusDocument = require("./models/BusDocument");
 const numCPUs = require("os").cpus().length;
 const express = require("express");
 const app = express();
-const server = require('http').createServer(app)
-
+const http = require("http");
+const server = http.createServer(app);
+const io = require('socket.io')(server, {
+  cors: {
+    origin: '*',
+  }
+});
 
 if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
 
-  for (let i = 0; i < numCPUs; i++) {
+  for (let i = 0; i < 1; i++) {
     cluster.fork();
   }
 
@@ -34,8 +39,6 @@ if (cluster.isMaster) {
   const bodyParser = require("body-parser");
   const session = require('express-session');
   const MongoStore = require('connect-mongo');
-  const apicache = require("apicache");
-
   const userRoutes = require("./routes/user");
   const agencyRoutes = require("./routes/agency");
   const ticketRoutes = require("./routes/ticket");
@@ -62,25 +65,16 @@ if (cluster.isMaster) {
     next();
   });
 
+  app.use(express.urlencoded({ extended: true }));
 
-
-  app.use(
-    express.urlencoded({
-      extended: true,
-    })
-  );
-
-
-  app.use(
-    session({
-      secret: process.env.OUR_SECRET,
-      resave: false,
-      saveUninitialized: true,
-      store: MongoStore.create({
-        mongoUrl: process.env.DATABASE_URL,
-      }),
-    })
-  );
+  app.use(session({
+    secret: process.env.OUR_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    store: MongoStore.create({
+      mongoUrl: process.env.DATABASE_URL,
+    }),
+  }));
 
   mongoose.connect(process.env.DATABASE_URL)
     .then(() => { console.log("Connected to database!") })
@@ -96,41 +90,36 @@ if (cluster.isMaster) {
   app.use('/notification', notificationRoutes);
   app.use('/docs', docsRoutes);
 
+  const PORT = process.env.PORT || 4461;
+  server.listen(PORT, () => {
+    console.log(`Worker ${process.pid} listening on http://localhost:${PORT}`);
+  });
 
-  const WebSocket = require('ws');
-  const wss = new WebSocket.Server({ server });
+  io.on('connection', function(socket) {
+    console.log('Socket connected');
 
-  wss.on('connection', function connection(ws) {
-    console.log('WebSocket client connected');
+    socket.on('disconnect', function() {
+      console.log('Socket disconnected');
+    });
   });
 
   setInterval(async () => {
     try {
       const docs = await BusDocument.find({ isAlerted: false });
       const alertedDocs = await checkForExpiredDocuments(docs);
-      console.log({alertedDocs})
       if (alertedDocs.length > 0) {
         const alertsToSend = [];
-  
+
         for (const doc of alertedDocs) {
           const updated = await BusDocument.findByIdAndUpdate(doc._id, { $set: { isAlerted: true } });
           alertsToSend.push(updated);
         }
       }
 
-      wss.clients.forEach(function each(client) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({ type: 'notification', message: 'New notification', data: alertedDocs }));
-        }
-      });
+      io.emit('notification', { type: 'notification', message: 'New notification', data: alertedDocs });
       console.log('Notifications sent');
     } catch (error) {
       console.error('Error checking for expired documents:', error);
     }
-  }, 10000);
-
-  const PORT = process.env.PORT || 4461;
-  app.listen(PORT, () => {
-    console.log(`Worker ${process.pid} listening on http://localhost:${PORT}`);
-  });
+  }, 1000 * 60 * 60 * 8);
 }
