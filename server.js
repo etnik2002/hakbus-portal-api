@@ -95,31 +95,31 @@ if (cluster.isMaster) {
     console.log(`Worker ${process.pid} listening on http://localhost:${PORT}`);
   });
 
-//   io.on('connection', function(socket) {
-//     console.log('Socket connected');
+  io.on('connection', function(socket) {
+    console.log('Socket connected');
 
-//     socket.on('disconnect', function() {
-//       console.log('Socket disconnected');
-//     });
-//   });
+    socket.on('disconnect', function() {
+      console.log('Socket disconnected');
+    });
+  });
 
-//   setInterval(async () => {
-//     try {
-//       const docs = await BusDocument.find({ isAlerted: false });
-//       const alertedDocs = await checkForExpiredDocuments(docs);
-//       if (alertedDocs.length > 0) {
-//         const alertsToSend = [];
+  setInterval(async () => {
+    try {
+      const docs = await BusDocument.find({ isAlerted: false });
+      const alertedDocs = await checkForExpiredDocuments(docs);
+      if (alertedDocs.length > 0) {
+        const alertsToSend = [];
 
-//         for (const doc of alertedDocs) {
-//           const updated = await BusDocument.findByIdAndUpdate(doc._id, { $set: { isAlerted: true } });
-//           alertsToSend.push(updated);
-//         }
-//       }
+        for (const doc of alertedDocs) {
+          const updated = await BusDocument.findByIdAndUpdate(doc._id, { $set: { isAlerted: true } });
+          alertsToSend.push(updated);
+        }
+      }
 
-//       io.emit('notification', { type: 'notification', message: 'New notification', data: alertedDocs });
-//       console.log('Notifications sent');
-//     } catch (error) {
-//       console.error('Error checking for expired documents:', error);
-//     }
-//   }, 1000 * 60 * 60 * 8);
+      io.emit('notification', { type: 'notification', message: 'New notification', data: alertedDocs });
+      console.log('Notifications sent');
+    } catch (error) {
+      console.error('Error checking for expired documents:', error);
+    }
+  }, 1000 * 60 * 60 * 8);
 }
