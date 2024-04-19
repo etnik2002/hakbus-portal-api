@@ -249,7 +249,7 @@ module.exports = {
             return ticketDate.isSame(currentDate, 'day') && ticketTime.isAfter(currentTime);
           });
           
-                    
+          
           const remainingTickets = uniqueTickets.filter((ticket) => !filteredTickets.includes(ticket));
 
           if(uniqueTickets.length == 0) {

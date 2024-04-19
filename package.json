@@ -29,6 +29,7 @@
     "express-rate-limit": "^7.1.5",
     "express-session": "^1.17.3",
     "firebase-admin": "^11.9.0",
+    "free-translate": "^0.6.1",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.0",
     "md5": "^2.3.0",
