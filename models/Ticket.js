@@ -41,6 +41,7 @@ const ticketSchema = mongoose.Schema({
       childrenPrice: { type: Number },
       maxBuyingTime: { type: String },
       arrivalTimestamp: { type: Date },
+      timestamp: { type: Number  }
     }
   ],
   date: {

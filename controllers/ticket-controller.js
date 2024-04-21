@@ -365,7 +365,6 @@ module.exports = {
       },
 
 }
-
 const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) => {
   const adjustDayOfWeek = (startDate, dayOfWeek) => {
     const adjustedDate = new Date(startDate);
@@ -374,7 +373,6 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) =>
   };
 
   const tickets = [];
-
 
   for (const selectedDayOfWeek of selectedDaysOfWeek) {
     const frankfurtTimezone = 'Europe/Berlin';
@@ -385,8 +383,8 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) =>
 
     for (let i = 0; i < 2 * 52; i++) {
       const ticketDateWithZeroHours = new Date(ticketDate);
-      const firstStartHour = ticketData.time.split(":")[0]
-      const firstStartMins = ticketData.time.split(":")[1]
+      const firstStartHour = ticketData.time.split(":")[0];
+      const firstStartMins = ticketData.time.split(":")[1];
       ticketDateWithZeroHours.setUTCHours(parseInt(firstStartHour), parseInt(firstStartMins), 0, 0);
 
       const ticketDateString = ticketDateWithZeroHours.toISOString();
@@ -395,8 +393,6 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) =>
         date: ticketDateString,
       };
 
-
-      
       const stopsWithTime = ticketDataWithDate.stops.map((stop) => {
         const stopDate = new Date(ticketDateString);
         const maxBuyingTime = new Date(stopDate);
@@ -406,7 +402,6 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) =>
         mbHours = stop.maxBuyingTime.split(':')[0];
         mbMins = stop.maxBuyingTime.split(':')[1];
         maxBuyingTime.setHours(parseInt(mbHours) + 1, mbMins, 0, 0);
-
 
         if (stop.isTomorrow) {
           stopDate.setDate(stopDate.getDate() + 1);
@@ -427,12 +422,15 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) =>
         const arrivalTimeMilliseconds = arrivalTimeHours * 60 * 60 * 1000 + arrivalTimeMinutes * 60 * 1000;
         arrivalTimeDate = new Date(stopDate.getTime() + arrivalTimeMilliseconds);
 
+        const stopTimestampMilliseconds = new Date(stopDate).getTime();
+        console.log({stopTimestampMilliseconds, real: new Date(stopTimestampMilliseconds)})
         return {
           ...stop,
           time: stop.time,
           date: stopDate.toISOString(),
           arrivalTimestamp: arrivalTimeDate,
-          maxBuyingTime: stop.maxBuyingTime
+          maxBuyingTime: stop.maxBuyingTime,
+          timestamp: stopTimestampMilliseconds 
         };
       });
 
@@ -451,7 +449,3 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) =>
   
   return tickets;
 };
-
-
-
-
