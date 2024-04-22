@@ -62,7 +62,6 @@ module.exports = {
 
     getBusDocuments: async (req,res) => {
         try {
-            const result = await cloudinary.uploader.upload(req.file?.path)
             const docs = await BusDocument.find({ bus: req.params.id });
             return res.status(200).json(docs)
         } catch (error) {
@@ -77,13 +76,12 @@ module.exports = {
             const expiresAtDate = new Date(validUntilDate);
             console.log({validUntilDate, expiresAtDate})
             expiresAtDate.setDate(validUntilDate.getDate() - (parseInt(req.body.expiresAt) * 7));
-            const images = req.files;
+            const images = req.files || req.file;
             const newDoc = new LicenceDocument({
                 images: images,
                 validUntil: req.body.validUntil,
                 expiresAt: expiresAtDate,
-                type: req.body.tyoe
-                
+                type: req.body.type
             })
             
             await newDoc.save();
