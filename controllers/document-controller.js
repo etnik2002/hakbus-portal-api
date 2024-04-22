@@ -73,11 +73,16 @@ module.exports = {
 
     importLicenceDocument: async (req,res) => {
         try {
+            const validUntilDate = new Date(req.body.validUntil);
+            const expiresAtDate = new Date(validUntilDate);
+            console.log({validUntilDate, expiresAtDate})
+            expiresAtDate.setDate(validUntilDate.getDate() - (parseInt(req.body.expiresAt) * 7));
             const images = req.files;
             const newDoc = new LicenceDocument({
                 images: images,
                 validUntil: req.body.validUntil,
-                expiresAt: req.body.expiresAt,
+                expiresAt: expiresAtDate,
+                type: req.body.tyoe
                 
             })
             
