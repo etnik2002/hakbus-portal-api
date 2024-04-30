@@ -1,4 +1,3 @@
-const cluster = require("cluster");
 const Ticket = require("./models/Ticket");
 const fetch = require("node-fetch");
 const Booking = require("./models/Booking");
@@ -17,6 +16,8 @@ const io = require('socket.io')(server, {
     origin: '*',
   }
 });
+
+const cluster = require("cluster")
 
 if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);

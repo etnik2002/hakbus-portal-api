@@ -13,6 +13,10 @@ const bookingSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Ticket'
     },
+    lineCode: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Line'
+    },
     agentHasDebt :{
         type: Boolean,
     },

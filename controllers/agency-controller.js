@@ -541,10 +541,10 @@ module.exports = {
         
         await agency.save();
 
-        res.status(200).json("Successfully confirmed payment"); 
+        return res.status(200).json("Successfully confirmed payment"); 
 
     } catch (error) {
-        res.status(500).json('error -> ' + error)
+        return res.status(500).json('error -> ' + error)
     }
   },    
 
@@ -572,7 +572,7 @@ module.exports = {
 
     } catch (error) {
         console.log(error)
-        res.status(500).json('error -> ' + error)
+        return res.status(500).json('error -> ' + error)
     }
   },
 
@@ -610,6 +610,7 @@ module.exports = {
       const newBooking = await new Booking({
         seller: agency?._id,
         ticket: req.params.ticketID,
+        lineCode: new mongoose.Types.ObjectId(ticket.lineCode._id),
         date: findDate(ticket, req.body.from.code, req.body.to.code),
         from: req.body.from.value,
         to: req.body.to.value,
@@ -620,7 +621,6 @@ module.exports = {
         isPaid: detectPayment(ticket, req.body.isPaid),
         agentHasDebt: true
       })
-
 
       await newBooking.save().then(async () => {
           await Ticket.findByIdAndUpdate(req.params.ticketID, {
@@ -637,12 +637,11 @@ module.exports = {
       const destination = { from: req.body.from.value, to: req.body.to.value };
       const dateTime = { date: ticket.date, time: findTime(ticket, req.body.from.code, req.body.to.code) };
       const dateString = findDate(ticket, req.body.from.code, req.body.to.code)
-      console.log({dateString})
 
       if(detectPayment(ticket, req.body.isPaid)){
         await generateQRCode(newBooking._id.toString(), newBooking.passengers, destination, dateTime,new Date(dateString).toDateString(), ticket?.lineCode?.freeLuggages, req.body.lng);
       }
-      res.status(200).json(newBooking);
+      return res.status(200).json("success");
     } catch (error) {
       console.log(error);
       return res.status(500).json(`error -> ${error}`);

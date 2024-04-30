@@ -163,6 +163,7 @@ module.exports = {
       const newBooking = new Booking({
         buyer: buyerObjectId,
         ticket: req.params.ticketID,
+        lineCode: new mongoose.Types.ObjectId(ticket.lineCode._id),
         firstname: req.body.firstname,
         date: findDate(ticket, req.body.from.code, req.body.to.code),
         from: req.body.from.value,
@@ -177,7 +178,7 @@ module.exports = {
         passengers: passengers,
         platform: req.body.platform,
       });
-  
+      
       await newBooking.save().then(async () => {
           await Ticket.findByIdAndUpdate(req.params.ticketID, {
             $inc: { numberOfTickets: -numberOfPsg },
@@ -210,10 +211,10 @@ module.exports = {
       }
        
       const createdBooking = await Booking.findById(newBooking._id).populate('ticket seller')
-      res.status(200).json(createdBooking);
+      return res.status(200).json(createdBooking);
     } catch (error) {
       console.log(error);
-      res.status(500).json({ message: `Server error -> ${error}` });
+      return res.status(500).json({ message: `Server error -> ${error}` });
     }
   },
 
@@ -360,45 +361,38 @@ module.exports = {
       
       getBookingsFromDateRange: async (req, res) => {
         try {
-          if (req.query.from === "" && req.query.to === "") {
-            const filteredBookings = await Booking.find()
-              .populate({
-                path: 'buyer',
-                select: '-password' 
-              }).populate({
-                path: 'ticket',
-                populate: { path: 'lineCode' } 
-              }).populate({
-                path: 'seller',
-                select: '-password'
-              })
-              .sort({ createdAt: 'desc' });
-            res.status(200).json(filteredBookings);
-          } else {
-            const fromDate = moment(req.query.from, 'DD-MM-YYYY').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-            const toDate = moment(req.query.to, 'DD-MM-YYYY').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-      
-            const filteredBookings = await Booking.find({
-              createdAt: { $gte: fromDate, $lte: toDate }
-            })
-              .populate({
-                path: 'buyer',
-                select: '-password' 
-              })
-              .populate({
-                path: 'ticket',
-                populate: { path: 'lineCode' } 
-              }).populate({
-                path: 'seller',
-                select: '-password'
-              })
-              .sort({ createdAt: 'desc' });
-      
-            res.status(200).json(filteredBookings);
+          let query = { isPaid: true };
+          const fromDate = moment(req.query.from, 'DD-MM-YYYY').startOf('day').toDate();
+          const toDate = moment(req.query.to, 'DD-MM-YYYY').startOf('day').toDate();
+  
+          
+          if (req.query.lineId) {
+              query.lineCode = new mongoose.Types.ObjectId(req.query.lineId);
           }
+  
+          if (req.query.from !== "" && req.query.to !== "" ) {
+              query.createdAt = { $gte: fromDate, $lte: toDate };
+          }
+          console.log({query})
+          const filteredBookings = await Booking.find(query)
+              .populate({
+                  path: 'buyer',
+                  select: '-password'
+              })
+              .populate({
+                  path: 'ticket',
+                  populate: { path: 'lineCode' }
+              })
+              .populate({
+                  path: 'seller',
+                  select: '-password'
+              })
+              .sort({ createdAt: 'desc' });
+  
+          return res.status(200).json(filteredBookings);
         } catch (error) {
-          console.log(error);
-          res.status(500).json({ message: `Server error -> ${error}` });
+            console.error('Error in getBookingsFromDateRange:', error);
+            return res.status(500).json({ message: 'Server error' });
         }
       },
       
