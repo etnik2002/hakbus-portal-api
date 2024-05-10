@@ -2,11 +2,11 @@ const router = require("express").Router();
 const { importDriverDocument, createBus,getAllDriverDocs, importLicenceDocument,getAllBusesDocs,searchDriverDocument, importBusDocument, getBusById, getAllBuses, getDriverDocuments, getBusDocuments, getLicenceDocuments, searchBusDocument } = require("../controllers/document-controller");
 const { productUpload } = require("../helpers/multer/multer");
 
-router.post('/driver/upload/:id',productUpload.single('images'), importDriverDocument);
+router.post('/driver/upload/:id',productUpload.array('images'), importDriverDocument);
 
-router.post('/bus/upload/:id',productUpload.single('images'), importBusDocument);
+router.post('/bus/upload/:id',productUpload.array('images'), importBusDocument);
 
-router.post('/licence/upload',productUpload.single('images'), importLicenceDocument);
+router.post('/licence/upload',productUpload.array('images'), importLicenceDocument);
 
 router.get('/driver/docs/:id', getDriverDocuments)
 

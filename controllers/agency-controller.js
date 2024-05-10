@@ -452,67 +452,64 @@ module.exports = {
     }
   },
 
-  getSearchedTickets: async (req, res) => {
+  getSearchedTickets: async (req,res) => {
     try {
-        let fromDate = moment(req.query.fromDate).startOf('day').subtract(1, 'day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-        let toDate = moment(req.query.toDate).endOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-        let currentDateFormatted = moment(new Date()).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-        let currentTimeFormatted = moment(new Date()).format('HH:mm');
-        if(fromDate < currentDateFormatted) { 
-          fromDate = currentDateFormatted;
-        }
-
-        const distinctTicketIds = await Ticket.distinct('_id', {
-            $or: [{
-                'stops.from.code': req.query.from,
-                'stops.to.code': req.query.to,
-            }]
-        });
-
-        const query = {
-            $match: {
-                _id: { $in: distinctTicketIds },
-                date: { $gte: fromDate, $lte: toDate },
-                numberOfTickets: { $gt: 0 },
-                isActive: true
-            }
-        }
-
-
-        const uniqueTickets = await Ticket.aggregate([
-            query,
-            {
-                $sort: { date: 1 },
-            },
-        ])
-
-        const filteredTickets = uniqueTickets.filter((ticket) => {
-          const date = moment(findDate(ticket, req.query.from, req.query.to));
-          const time = findMAxBuyingTime(ticket, req.query.from, req.query.to) || findTime(ticket, req.query.from, req.query.to);
-          const [hours, minutes] = time.split(":");
-          const ticketDateTime = new Date(date);
-          console.log({date, time, ticketDateTime})
-          ticketDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-            const currentDate = moment(fromDate);
-            const finalDate = moment(ticketDateTime)
-            const currentTime = moment(currentTimeFormatted, 'HH:mm');
-            console.log({ticketDateTime, currentDate, finalDate, currentTime, time})
-            return finalDate.isSameOrAfter(currentDate, 'day')  && time < currentTime;
-        });
-
-        const remainingTickets = uniqueTickets.filter((ticket) => !filteredTickets.includes(ticket));
-
-        if (remainingTickets.length == 0) {
-            return res.status(204).json("no routes found");
-        }
-
-        return res.status(200).json(remainingTickets);
+      let page = Number(req.query.page) || 1;
+      let size = Number(8);
+      const skipCount = (page - 1) * size;
+  
+      const europeBerlinTimezone = 'Europe/Berlin';
+      const currentDateFormatted = moment().tz(europeBerlinTimezone).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+      const currentTimeFormatted = moment().tz(europeBerlinTimezone).format('HH:mm');
+      console.log({currentDateFormatted})
+      const distinctTicketIds = await Ticket.distinct('_id', {
+        $or: [
+          {
+            'stops.from.code': req.query.from,
+            'stops.to.code': req.query.to,
+          }
+        ]
+      });
+  
+      const uniqueTickets = await Ticket.aggregate([
+        {
+          $match: {
+            _id: { $in: distinctTicketIds },
+            date: { $gte: currentDateFormatted },
+            numberOfTickets: { $gt: 0 },
+            isActive: true
+          }
+        },
+        {
+          $sort: { date: 1 },
+        },
+        {
+          $skip: skipCount,
+        },
+        {
+          $limit: size,
+        },
+      ])
+  
+      const filteredTickets = uniqueTickets.filter((ticket) => {
+        const ticketDateTime = moment(`${findDate(ticket, req.query.from, req.query.to)} ${findTime(ticket, req.query.from, req.query.to)}`, 'YYYY-MM-DD HH:mm');
+        const currentDateTime = moment(`${currentDateFormatted} ${currentTimeFormatted}`, 'YYYY-MM-DD HH:mm').tz(europeBerlinTimezone);
+    
+        return currentDateTime.isAfter(ticketDateTime);
+    });
+  
+      const remainingTickets = uniqueTickets.filter((ticket) => !filteredTickets.includes(ticket));
+  
+      if (uniqueTickets.length == 0) {
+        return res.status(204).json("no routes found");
+      }
+  
+      return res.status(200).json(remainingTickets);
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Internal server error' + error });
+      console.error(error);
+      res.status(500).json({ message: "Internal error -> " + error });
     }
-},
-
+  },
 
   getAgenciesInTotalDebt: async (req,res)=> {
     try {

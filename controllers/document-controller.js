@@ -22,15 +22,14 @@ module.exports = {
             console.log({validUntilDate, expiresAtDate})
             expiresAtDate.setDate(validUntilDate.getDate() - (parseInt(req.body.expiresAt) * 7));
 
-            const images = req.files || req.file;
+            const images = Array.isArray(req.files) ? req.files : [req.files || req.file];
             const newDoc = new DriverDocument({
-                images: images,
+                images: images.map(file => ({ filename: file.filename, path: file.path })),
                 validUntil: req.body.validUntil,
                 expiresAt: expiresAtDate,
                 type: req.body.type,
                 driver: req.params.id,
-
-            })
+            });
                         
             await newDoc.save();
             return res.status(200).json("New driver doc saved");
@@ -76,9 +75,9 @@ module.exports = {
             const expiresAtDate = new Date(validUntilDate);
             console.log({validUntilDate, expiresAtDate})
             expiresAtDate.setDate(validUntilDate.getDate() - (parseInt(req.body.expiresAt) * 7));
-            const images = req.files || req.file;
+            const images = Array.isArray(req.files) ? req.files : [req.files || req.file];
             const newDoc = new LicenceDocument({
-                images: images,
+                images: images.map(file => ({ filename: file.filename, path: file.path })),
                 validUntil: req.body.validUntil,
                 expiresAt: expiresAtDate,
                 type: req.body.type
@@ -114,7 +113,7 @@ module.exports = {
 
     importBusDocument: async (req, res) => {
         try {
-            const images = req.files || req.file;
+            const images = Array.isArray(req.files) ? req.files : [req.files || req.file];
             const body = req.body;
     
             const validUntilDate = new Date(req.body.validUntil);
@@ -123,7 +122,7 @@ module.exports = {
             expiresAtDate.setDate(validUntilDate.getDate() - (parseInt(req.body.expiresAt) * 7));
             
             const newDoc = new BusDocument({
-                images: images,
+                images: images.map(file => ({ filename: file.filename, path: file.path })),
                 validUntil: req.body.validUntil,
                 expiresAt: expiresAtDate, 
                 type: req.body.type,
