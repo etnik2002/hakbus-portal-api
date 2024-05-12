@@ -152,15 +152,19 @@ module.exports = {
         try {
             let startDate = req.query.startDate;
             let endDate = req.query.endDate;
-    
+            
             startDate = new Date(startDate);
             endDate = new Date(endDate);
-    
+            
+            startDate.setDate(startDate.getDate() - 1);
+            
             startDate.setUTCHours(0, 0, 0, 0);
             endDate.setUTCHours(0, 0, 0, 0);
-    
+            
             startDate = startDate.toISOString();
             endDate = endDate.toISOString();
+          
+            console.log({startDate, endDate})
             const allBookings = await Booking.find({});
             const allLineIDS = req.query.line.split('-');
             let ticketsWithBookings = [];
