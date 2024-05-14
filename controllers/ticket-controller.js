@@ -402,7 +402,7 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) =>
         const maxBuyingTime = new Date(stopDate);
         const hour = stop.time.split(":")[0];
         const minute = stop.time.split(":")[1];
-        stopDate.setHours(parseInt(hour) + 1, parseInt(minute), 0, 0);
+        stopDate.setHours(parseInt(hour), parseInt(minute), 0, 0);
         mbHours = stop.maxBuyingTime.split(':')[0];
         mbMins = stop.maxBuyingTime.split(':')[1];
         maxBuyingTime.setHours(parseInt(mbHours) + 1, mbMins, 0, 0);
