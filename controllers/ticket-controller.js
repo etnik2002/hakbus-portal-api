@@ -369,10 +369,11 @@ module.exports = {
       },
 
 }
+
 const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) => {
   const adjustDayOfWeek = (startDate, dayOfWeek) => {
     const adjustedDate = new Date(startDate);
-    adjustedDate.setDate(startDate.getDate() + ((dayOfWeek + 6 - startDate.getDay()) % 7));
+    adjustedDate.setUTCDate(startDate.getUTCDate() + ((dayOfWeek + 6 - startDate.getUTCDay()) % 7));
     return adjustedDate;
   };
 
@@ -402,14 +403,13 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) =>
         const maxBuyingTime = new Date(stopDate);
         const hour = stop.time.split(":")[0];
         const minute = stop.time.split(":")[1];
-        stopDate.setHours(parseInt(hour), parseInt(minute), 0, 0);
+        stopDate.setUTCHours(parseInt(hour), parseInt(minute), 0, 0);
         mbHours = stop.maxBuyingTime.split(':')[0];
         mbMins = stop.maxBuyingTime.split(':')[1];
-        maxBuyingTime.setHours(parseInt(mbHours) + 1, mbMins, 0, 0);
+        maxBuyingTime.setUTCHours(parseInt(mbHours) + 1, mbMins, 0, 0);
 
-        
         if (stop.isTomorrow) {
-          stopDate.setDate(stopDate.getDate() + 1);
+          stopDate.setUTCDate(stopDate.getUTCDate() + 1);
         }
 
         let arrivalTimeHours = 0;
@@ -420,14 +420,14 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) =>
           arrivalTimeHours = stop.arrivalTime.split(":")[0];
           arrivalTimeMinutes = stop.arrivalTime.split(":")[1];
         } else {
-            arrivalTimeHours = parseInt(stop.arrivalTime);
-            arrivalTimeMinutes = 0;
+          arrivalTimeHours = parseInt(stop.arrivalTime);
+          arrivalTimeMinutes = 0;
         }
         
         const arrivalTimeMilliseconds = arrivalTimeHours * 60 * 60 * 1000 + arrivalTimeMinutes * 60 * 1000;
         arrivalTimeDate = new Date(stopDate.getTime() + arrivalTimeMilliseconds);
 
-        const stopTimestampMilliseconds = new Date(stopDate).getTime();
+        const stopTimestampMilliseconds = stopDate.getTime();
         console.log({stopTimestampMilliseconds, real: new Date(stopTimestampMilliseconds)})
         return {
           ...stop,
@@ -446,7 +446,7 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) =>
 
       tickets.push(ticketWithStops);
 
-      ticketDate.setDate(ticketDate.getDate() + 7);
+      ticketDate.setUTCDate(ticketDate.getUTCDate() + 7);
     }
   }
 
