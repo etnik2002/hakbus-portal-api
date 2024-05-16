@@ -461,7 +461,11 @@ module.exports = {
       const europeBerlinTimezone = 'Europe/Berlin';
       const currentDateFormatted = moment().tz(europeBerlinTimezone).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
       const currentTimeFormatted = moment().tz(europeBerlinTimezone).format('HH:mm');
-      console.log({currentDateFormatted})
+      const fromDate = moment(req.query.fromDate).tz(europeBerlinTimezone).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+      const toDate = moment(req.query.fromDate).tz(europeBerlinTimezone).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+
+
+      console.log({fromDate, toDate})
       const distinctTicketIds = await Ticket.distinct('_id', {
         $or: [
           {
@@ -475,7 +479,7 @@ module.exports = {
         {
           $match: {
             _id: { $in: distinctTicketIds },
-            date: { $gte: currentDateFormatted },
+            date: { $gte: fromDate, $lte: toDate },
             numberOfTickets: { $gt: 0 },
             isActive: true
           }
@@ -483,12 +487,12 @@ module.exports = {
         {
           $sort: { date: 1 },
         },
-        {
-          $skip: skipCount,
-        },
-        {
-          $limit: size,
-        },
+        // {
+        //   $skip: skipCount,
+        // },
+        // {
+        //   $limit: size,
+        // },
       ])
   
       const filteredTickets = uniqueTickets.filter((ticket) => {
@@ -500,7 +504,7 @@ module.exports = {
   
       const remainingTickets = uniqueTickets.filter((ticket) => !filteredTickets.includes(ticket));
   
-      if (uniqueTickets.length == 0) {
+      if (remainingTickets.length == 0) {
         return res.status(204).json("no routes found");
       }
   
