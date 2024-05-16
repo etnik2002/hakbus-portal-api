@@ -54,14 +54,28 @@ module.exports = {
     
     modifyLineTickets: async (req, res) => {
       try {
-        const { stops } = req.body; 
-        console.log({stops})
+        const { stops } = req.body;
+        console.log({stops});
+        console.log("Processing...");
+    
+        const stopsWithoutDate = stops.map(stop => {
+          const { date, ...rest } = stop;
+          return rest;
+        });
+    
         const tickets = await Ticket.find({ lineCode: req.body.lineCode });
     
         for (const ticket of tickets) {
-          ticket.stops = stops; 
+          for (let i = 0; i < ticket.stops.length; i++) {
+            const originalDate = ticket.stops[i].date;
+            ticket.stops[i] = stopsWithoutDate[i];
+            ticket.stops[i].date = originalDate;
+          }
           await ticket.save();
+          console.log(ticket)
         }
+    
+        console.log("Finished");
     
         return res.status(200).json({ message: 'Tickets updated successfully' });
       } catch (error) {
@@ -69,6 +83,8 @@ module.exports = {
         return res.status(500).json({ error: 'Internal server error' });
       }
     },
+    
+    
 
     
     
