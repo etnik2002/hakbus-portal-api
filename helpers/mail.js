@@ -153,37 +153,38 @@ async function generateQRCode(data, passengers, destination, dateTime,dateString
                         </style>
                     </head>
 
-                      <body>
-                      <div class="ticket-container">
-                        <img class="qr-code" src=${result.secure_url} alt="QR Code" />
-                        <div class="ticket-header">
-                          <p>Hello ${passenger?.fullName || 'Passenger'},</p>
-                          <p>${await translate_text("Your Hakbus online booking", lng)}</p>
-                        </div>
-                        <div class="booking-details ">
-                          <p><strong>${await translate_text("The Destination", lng)} :</strong> ${destination.from} -> ${destination.to}</p>
-                          <p><strong>${await translate_text("The Date", lng)}:</strong> ${moment(dateTime.date).format("DD-MM-YYYY")}, <strong>${await translate_text("The Time", lng)}: </strong> ${dateTime.time}</p>
-                          <p><strong>${await translate_text("The Day", lng)}:</strong> ${dateString}</p>
-                          <p>${passenger?.age <= 10 ? await translate_text("Child", lng) : await translate_text("Adult", lng)}</p>
-                          <p>Booking ID: ${data}</p>
-                          <p>${await translate_text("Free luggages", lng)}: ${freeLuggages}</p>
-                          <p>${await translate_text("Extra luggages", lng)}: ${passenger?.numberOfLuggages}</p>
-                          <b>${await translate_text("Luggage price", lng)} :&euro; ${passenger?.luggagePrice}</b> <br />
-                          <b>${await translate_text("Ticket price", lng)} :&euro; ${passenger?.price}</b> <br />
-                          <b>${await translate_text("Total price", lng)} :&euro; ${passenger?.price + passenger?.luggagePrice}</b> <br />
-                        </div>
-                        <div class="onboarding-message">
-                          <p>${await translate_text("Use this QR code for onboarding when you travel with HakBus.", lng)}</p>
-                        </div>
-                        <div class="important-message">
-                          <p>${await translate_text("Important: Keep this QR code safely as it serves as proof of your payment and is required for travel verification.", lng)}</p>
-                        </div>
-                        <div class="thank-you">
-                          <p>${await translate_text("Thank you for choosing HakBus!", lng)}</p>
-                        </div>
+                    <body>
+                    <div class="ticket-container">
+                      <img class="qr-code" src=${result.secure_url} alt="QR Code" />
+                      <div class="ticket-header">
+                        <p>Hello ${passenger?.fullName || 'Passenger'},</p>
+                        <p>Your Hakbus online booking</p>
                       </div>
-                    </body>
+                      <div class="booking-details">
+                        <p><strong>The Destination:</strong> ${destination.from} -> ${destination.to}</p>
+                        <p><strong>The Date:</strong> ${moment(dateTime.date).format("DD-MM-YYYY")}, <strong>The Time:</strong> ${dateTime.time}</p>
+                        <p><strong>The Day:</strong> ${dateString}</p>
+                        <p>${passenger?.age <= 10 ? "Child" : "Adult"}</p>
+                        <p>Booking ID: ${data}</p>
+                        <p>Free luggages: ${freeLuggages}</p>
+                        <p>Extra luggages: ${passenger?.numberOfLuggages}</p>
+                        <b>Luggage price: &euro; ${passenger?.luggagePrice}</b> <br />
+                        <b>Ticket price: &euro; ${passenger?.price}</b> <br />
+                        <b>Total price: &euro; ${passenger?.price + passenger?.luggagePrice}</b> <br />
+                      </div>
+                      <div class="onboarding-message">
+                        <p>Use this QR code for onboarding when you travel with HakBus.</p>
+                      </div>
+                      <div class="important-message">
+                        <p>Important: Keep this QR code safely as it serves as proof of your payment and is required for travel verification.</p>
+                      </div>
+                      <div class="thank-you">
+                        <p>Thank you for choosing HakBus!</p>
+                      </div>
+                    </div>
+                  </body>
                   </html>
+                  
                 `,
               });
           console.log('QR code uploaded to Cloudinary:', result.secure_url);
