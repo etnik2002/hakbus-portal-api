@@ -462,7 +462,7 @@ module.exports = {
       const currentDateFormatted = moment().tz(europeBerlinTimezone).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
       const currentTimeFormatted = moment().tz(europeBerlinTimezone).format('HH:mm');
       const fromDate = moment(req.query.fromDate).tz(europeBerlinTimezone).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-      const toDate = moment(req.query.fromDate).tz(europeBerlinTimezone).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+      const toDate = moment(req.query.toDate).tz(europeBerlinTimezone).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
 
 
       console.log({fromDate, toDate})
@@ -474,7 +474,7 @@ module.exports = {
           }
         ]
       });
-  
+      
       const uniqueTickets = await Ticket.aggregate([
         {
           $match: {
