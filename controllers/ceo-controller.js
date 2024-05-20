@@ -46,21 +46,27 @@ module.exports = {
 
     editObserver: async (req,res) => {
       try {
-        const hashedPassword = await bcrypt.hashSync(req.body.password, 10);
         const observer = await Ceo.findById(req.params.id);
+    
+        let hashedPassword = observer.password;
+        if (req.body.password) {
+          hashedPassword = await bcrypt.hashSync(req.body.password, 10);
+        }
+    
         const editPayload = {
           name: req.body.name || observer.name,
-          email: req.body.email ||observer.email,
-          password: hashedPassword || observer.password,
+          email: req.body.email || observer.email,
+          password: hashedPassword,
           access: req.body.access || observer.access,
           lines: req.body.lines || observer.lines
-        }
-        
+        };
+    
         await Ceo.findByIdAndUpdate(observer._id, editPayload);
+    
         return res.status(200).json("Observer saved");
       } catch (error) {
         console.error(error);
-        res.status(500).json(error)
+        res.status(500).json(error);
       }
     },
 
