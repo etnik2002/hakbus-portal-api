@@ -418,7 +418,7 @@ module.exports = {
 
     getOnlineBookings: async (req,res) => {
       try {
-        const bookings = await Booking.find({ seller: null, isPaid: true });
+        const bookings = await Booking.find({ seller: null, isPaid: true }).populate('ticket');
         return res.status(200).json(bookings);
       } catch (error) {
         console.error('Error fetching bookings:', error);
