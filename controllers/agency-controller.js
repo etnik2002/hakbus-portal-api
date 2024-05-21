@@ -515,6 +515,63 @@ module.exports = {
     }
   },
 
+
+  changePassword: async (req,res) => {
+    try {
+      const agency = await Agency.findById(req.params.id);
+      if (!agency) return res.status(404).json("CEO not found");
+  
+      const { oldPassword, newPassword, email } = req.body;
+  
+      const passwordMatches = await bcrypt.compare(oldPassword, agency.password);
+      console.log(passwordMatches);
+      if (!passwordMatches) return res.status(401).json("wrong old password");
+  
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      console.log(hashedPassword);
+  
+      if (email) {
+        agency.email = email;
+      }
+      agency.password = hashedPassword;
+  
+      await agency.save();
+  
+      const ceoPayload = {
+        id: agency._id,
+        email: agency.email,
+      };
+  
+      const token = jwt.sign(ceoPayload, process.env.OUR_SECRET);
+      return res.status(200).json({ token });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error);
+    }
+  },
+
+  changeEmail: async (req,res) => {
+    try {
+      console.log(req.params);
+      const agency = await Agency.findById(req.params.id);
+      agency.email = req.body.email;
+      await agency.save();
+      agency.password = undefined;
+      const agencyPayload = {
+        ...agency,
+        password: undefined,
+      }
+      console.log(agencyPayload);
+
+      const token = jwt.sign(agencyPayload, process.env.OUR_SECRET);
+      return res.status(200).json(token);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error);
+    }
+  },
+
   getAgenciesInTotalDebt: async (req,res)=> {
     try {
       const agencies = await Agency.find({ debt: { $gt: 0 } }).select('name debt');
