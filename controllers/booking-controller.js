@@ -413,9 +413,18 @@ module.exports = {
             res.status(200).json(booking);
             
         } catch (error) {
-            res.status(500).json({ message: `Server error -> ${error}` })
         }
     },
+
+    getOnlineBookings: async (req,res) => {
+      try {
+        const bookings = await Booking.find({ seller: null, isPaid: true });
+        return res.status(200).json(bookings);
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+        res.status(500).json({ message: `Server error -> ${error}` })
+      }
+    } ,
 
     getMonthlyBookings: async (req, res) => {
         try {
