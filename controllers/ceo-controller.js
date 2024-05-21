@@ -1,5 +1,5 @@
 require("dotenv").config()
-const { sendAttachmentToOneForAll } = require("../helpers/mail");
+const { sendAttachmentToOneForAll, SendConfirmationEmail } = require("../helpers/mail");
 const Agency = require("../models/Agency");
 const Booking = require("../models/Booking");
 const Ceo = require("../models/Ceo");
@@ -400,7 +400,7 @@ module.exports = {
             } else {
               return res.status(404).json('Agency not found.');
             }
-        
+            await SendConfirmationEmail(agency);
             res.status(200).json(`Pagesa e borxhit per ${agency.name} me vlere ${debtValue} € u konfirmua me sukses.`);
           } catch (error) {
             console.log(error)

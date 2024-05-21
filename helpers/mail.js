@@ -24,6 +24,38 @@ const storage = new CloudinaryStorage({
 
 const multerUploader = multer({ storage: storage });
 
+async function SendConfirmationEmail(agency) {
+  try {
+    console.log({agency})
+    let transporter = nodemailer.createTransport({
+      pool: true,
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, 
+      auth: {
+        user: 'hakbusticket@gmail.com',
+        pass: 'upkaafqoytlnnxjh',
+      },
+    });
+
+    const mailOptions = {
+      from: '"Debt Confirmation" <hakbusticket@gmail.com>',
+      to: agency.email,
+      subject: 'Debt Confirmation',
+      text: `Dear ${agency.name},\n\nThe debt is confirmed and should be updated on your dashboard.\n\nBest regards,\nYour Company Name`,
+      html: `<p>Dear ${agency.name},</p><p>The debt is confirmed and should be updated on your dashboard.</p><p>Best regards,<br>Your Company Name</p>`,
+    };
+
+    let info = await transporter.sendMail(mailOptions);
+
+    console.log('Message sent: %s', info.messageId);
+
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
 async function translate_text(text, lng) {
   try {
     const language = lng || "en"
@@ -651,4 +683,4 @@ async function sendBookingCancellationNotification(passenger, booking) {
 
 
 
-module.exports = { getTicketsFromDateToDate, sendOrderToUsersEmail, sendOrderToUsersPhone,cancelNotPaidBookingImmediately, sendAttachmentToAllPassengers, sendAttachmentToOneForAll, generateQRCode, sendBookingCancellationNotification };
+module.exports = { getTicketsFromDateToDate,SendConfirmationEmail, sendOrderToUsersEmail, sendOrderToUsersPhone,cancelNotPaidBookingImmediately, sendAttachmentToAllPassengers, sendAttachmentToOneForAll, generateQRCode, sendBookingCancellationNotification };
