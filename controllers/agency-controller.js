@@ -684,7 +684,7 @@ module.exports = {
 
       await newBooking.save().then(async () => {
           await Ticket.findByIdAndUpdate(req.params.ticketID, {
-            $inc: { numberOfTickets: -1 },
+            $inc: { numberOfTickets: newBooking.passenger.length },
           });
   
         if(detectPayment(ticket, req.body.isPaid)) {
