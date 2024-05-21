@@ -42,7 +42,7 @@ async function SendConfirmationEmail(agency) {
       from: '"Debt Confirmation" <hakbusticket@gmail.com>',
       to: agency.email,
       subject: 'Debt Confirmation',
-      text: `Dear ${agency.name},\n\nThe debt is confirmed and should be updated on your dashboard.\n\nBest regards,\nYour Company Name`,
+      text: `Dear ${agency.name},\n\nThe debt is confirmed and should be updated on your dashboard.\n\nBest regards,\nHakBus`,
       html: `<p>Dear ${agency.name},</p><p>The debt is confirmed and should be updated on your dashboard.</p><p>Best regards,<br>HakBus</p>`,
     };
 
