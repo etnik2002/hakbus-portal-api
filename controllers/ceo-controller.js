@@ -382,7 +382,6 @@ module.exports = {
             const debtValue = parseFloat(debt);
             const agency = await Agency.findById(req.params.id);
             const ceo = await Ceo.find({}).limit(1);
-            console.log({bookingIDS})
             const paidDebt = await Agency.findByIdAndUpdate(req.params.id, { $inc: { debt: -debtValue } });
             for (const id of bookingIDS) {
               const updated = await Booking.findByIdAndUpdate(id, { $set: { agentHasDebt: false } });
