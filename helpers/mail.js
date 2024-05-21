@@ -43,7 +43,7 @@ async function SendConfirmationEmail(agency) {
       to: agency.email,
       subject: 'Debt Confirmation',
       text: `Dear ${agency.name},\n\nThe debt is confirmed and should be updated on your dashboard.\n\nBest regards,\nYour Company Name`,
-      html: `<p>Dear ${agency.name},</p><p>The debt is confirmed and should be updated on your dashboard.</p><p>Best regards,<br>Your Company Name</p>`,
+      html: `<p>Dear ${agency.name},</p><p>The debt is confirmed and should be updated on your dashboard.</p><p>Best regards,<br>HakBus</p>`,
     };
 
     let info = await transporter.sendMail(mailOptions);
