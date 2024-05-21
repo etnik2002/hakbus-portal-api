@@ -446,23 +446,32 @@ module.exports = {
       changePassword: async (req,res) => {
         try {
           const ceo = await Ceo.findById(req.params.id);
-          const { oldPassword, newPassword } = req.body;
+          if (!ceo) return res.status(404).json("CEO not found");
+      
+          const { oldPassword, newPassword, email } = req.body;
+      
           const passwordMatches = await bcrypt.compare(oldPassword, ceo.password);
           console.log(passwordMatches);
-          if(!passwordMatches) return res.status(401).json("wrong old password");
-          const salt = await bcrypt.genSaltSync(10);
-          const hashedPassword = await bcrypt.hashSync(newPassword, salt);
+          if (!passwordMatches) return res.status(401).json("wrong old password");
+      
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(newPassword, salt);
           console.log(hashedPassword);
-          ceo.email = req.body.email;
-          ceo.password = hashedPassword;
-          await ceo.save();
-          const ceoPayload = {
-            ...ceo,
-            password: undefined,
+      
+          if (email) {
+            ceo.email = email;
           }
-
+          ceo.password = hashedPassword;
+      
+          await ceo.save();
+      
+          const ceoPayload = {
+            id: ceo._id,
+            email: ceo.email,
+          };
+      
           const token = jwt.sign(ceoPayload, process.env.OUR_SECRET);
-          return res.status(200).json(token);
+          return res.status(200).json({ token });
         } catch (error) {
           console.log(error);
           return res.status(500).json(error);
