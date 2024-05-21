@@ -120,6 +120,7 @@ function detectPayment(ticket, isPaid) {
 
 module.exports = {
 
+  
     createAgency :  async (req,res) => {
         try {
             const hashedPassword = await bcrypt.hashSync(req.body.password, 10);
