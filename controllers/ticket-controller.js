@@ -156,7 +156,7 @@ module.exports = {
             startDate = new Date(startDate);
             endDate = new Date(endDate);
             
-            startDate.setDate(startDate.getDate() - 1);
+            endDate.setDate(endDate.getDate() + 1);
             
             startDate.setUTCHours(0, 0, 0, 0);
             endDate.setUTCHours(0, 0, 0, 0);

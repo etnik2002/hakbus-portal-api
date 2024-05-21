@@ -308,7 +308,7 @@ module.exports = {
             },
           ]);
           
-
+          console.log({agencySales})
           const agenciesInDebt = await Agency.find({ _id: { $in: agencySales.map((item) => item._id) } })
             .select('-password -email -country -city -isApplicant -profit -phone -createdAt -updatedAt -company_id -vat -isActive')
             .lean();
