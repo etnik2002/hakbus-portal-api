@@ -52,7 +52,7 @@ module.exports = {
         if (req.body.password) {
           hashedPassword = await bcrypt.hashSync(req.body.password, 10);
         }
-    
+        
         const editPayload = {
           name: req.body.name || observer.name,
           email: req.body.email || observer.email,
