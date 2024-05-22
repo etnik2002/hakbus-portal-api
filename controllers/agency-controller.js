@@ -121,6 +121,7 @@ function detectPayment(ticket, isPaid) {
 
 module.exports = {
 
+  
     createAgency :  async (req,res) => {
         try {
             const hashedPassword = await bcrypt.hashSync(req.body.password, 10);
@@ -312,7 +313,7 @@ module.exports = {
             },
           ]);
           
-
+          console.log({agencySales})
           const agenciesInDebt = await Agency.find({ _id: { $in: agencySales.map((item) => item._id) } })
             .select('-password -email -country -city -isApplicant -profit -phone -createdAt -updatedAt -company_id -vat -isActive')
             .lean();
@@ -526,6 +527,63 @@ module.exports = {
     }
   },
 
+
+  changePassword: async (req,res) => {
+    try {
+      const agency = await Agency.findById(req.params.id);
+      if (!agency) return res.status(404).json("CEO not found");
+  
+      const { oldPassword, newPassword, email } = req.body;
+  
+      const passwordMatches = await bcrypt.compare(oldPassword, agency.password);
+      console.log(passwordMatches);
+      if (!passwordMatches) return res.status(401).json("wrong old password");
+  
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      console.log(hashedPassword);
+  
+      if (email) {
+        agency.email = email;
+      }
+      agency.password = hashedPassword;
+  
+      await agency.save();
+  
+      const ceoPayload = {
+        id: agency._id,
+        email: agency.email,
+      };
+  
+      const token = jwt.sign(ceoPayload, process.env.OUR_SECRET);
+      return res.status(200).json({ token });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error);
+    }
+  },
+
+  changeEmail: async (req,res) => {
+    try {
+      console.log(req.params);
+      const agency = await Agency.findById(req.params.id);
+      agency.email = req.body.email;
+      await agency.save();
+      agency.password = undefined;
+      const agencyPayload = {
+        ...agency,
+        password: undefined,
+      }
+      console.log(agencyPayload);
+
+      const token = jwt.sign(agencyPayload, process.env.OUR_SECRET);
+      return res.status(200).json(token);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error);
+    }
+  },
+
   getAgenciesInTotalDebt: async (req,res)=> {
     try {
       const agencies = await Agency.find({ debt: { $gt: 0 } }).select('name debt');
@@ -595,6 +653,7 @@ module.exports = {
         return res.status(401).json("Agent not active")
       }
       const ticket = await Ticket.findById(req.params.ticketID).populate("lineCode");
+      const ceo = await Ceo.aggregate([{$match: {}}]);
       
       
       let totalPrice = 0;
@@ -635,8 +694,9 @@ module.exports = {
       })
 
       await newBooking.save().then(async () => {
+        const psg = newBooking.passengers.length || 1
           await Ticket.findByIdAndUpdate(req.params.ticketID, {
-            $inc: { numberOfTickets: -1 },
+            $inc: { numberOfTickets: psg },
           });
   
         if(detectPayment(ticket, req.body.isPaid)) {
@@ -645,7 +705,21 @@ module.exports = {
           });
         }
       });
-  
+
+      var seatNotification = {};
+      if (ticket.numberOfTickets <= ceo[0].nrOfSeatsNotification + 1) {
+        seatNotification = {
+          type: 'seat',
+          message: `Kanë mbetur vetëm ${ceo[0].nrOfSeatsNotification} vende të lira për linjën (${ticket.from} / ${ticket.to}) me datë ${moment(ticket.date).format('DD-MM-YYYY')}`,
+          title: `${ceo[0].nrOfSeatsNotification} ulëse të mbetura`,
+          ticket_id: ticket._id,
+          link: `${process.env.FRONTEND_URL}/ticket/edit/${ticket._id}`,
+          confirmed: false,
+        };
+        await Ceo.findByIdAndUpdate(ceo[0]._id, { $push: { notifications: seatNotification } });
+      }
+
+
       const destination = { from: req.body.from.value, to: req.body.to.value };
       const dateTime = { date: ticket.date, time: findTime(ticket, req.body.from.code, req.body.to.code) };
       const dateString = findDate(ticket, req.body.from.code, req.body.to.code)

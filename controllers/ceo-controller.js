@@ -1,5 +1,5 @@
 require("dotenv").config()
-const { sendAttachmentToOneForAll } = require("../helpers/mail");
+const { sendAttachmentToOneForAll, SendConfirmationEmail } = require("../helpers/mail");
 const Agency = require("../models/Agency");
 const Booking = require("../models/Booking");
 const Ceo = require("../models/Ceo");
@@ -46,21 +46,27 @@ module.exports = {
 
     editObserver: async (req,res) => {
       try {
-        const hashedPassword = await bcrypt.hashSync(req.body.password, 10);
         const observer = await Ceo.findById(req.params.id);
-        const editPayload = {
-          name: req.body.name || observer.name,
-          email: req.body.email ||observer.email,
-          password: hashedPassword || observer.password,
-          access: req.body.access || observer.access,
-          lines: req.body.lines || observer.lines
+    
+        let hashedPassword = observer.password;
+        if (req.body.password) {
+          hashedPassword = await bcrypt.hashSync(req.body.password, 10);
         }
         
+        const editPayload = {
+          name: req.body.name || observer.name,
+          email: req.body.email || observer.email,
+          password: hashedPassword,
+          access: req.body.access || observer.access,
+          lines: req.body.lines || observer.lines
+        };
+    
         await Ceo.findByIdAndUpdate(observer._id, editPayload);
+    
         return res.status(200).json("Observer saved");
       } catch (error) {
         console.error(error);
-        res.status(500).json(error)
+        res.status(500).json(error);
       }
     },
 
@@ -376,7 +382,6 @@ module.exports = {
             const debtValue = parseFloat(debt);
             const agency = await Agency.findById(req.params.id);
             const ceo = await Ceo.find({}).limit(1);
-            console.log({bookingIDS})
             const paidDebt = await Agency.findByIdAndUpdate(req.params.id, { $inc: { debt: -debtValue } });
             for (const id of bookingIDS) {
               const updated = await Booking.findByIdAndUpdate(id, { $set: { agentHasDebt: false } });
@@ -395,7 +400,7 @@ module.exports = {
             } else {
               return res.status(404).json('Agency not found.');
             }
-        
+            await SendConfirmationEmail(agency);
             res.status(200).json(`Pagesa e borxhit per ${agency.name} me vlere ${debtValue} € u konfirmua me sukses.`);
           } catch (error) {
             console.log(error)
@@ -440,23 +445,32 @@ module.exports = {
       changePassword: async (req,res) => {
         try {
           const ceo = await Ceo.findById(req.params.id);
-          const { oldPassword, newPassword } = req.body;
+          if (!ceo) return res.status(404).json("CEO not found");
+      
+          const { oldPassword, newPassword, email } = req.body;
+      
           const passwordMatches = await bcrypt.compare(oldPassword, ceo.password);
           console.log(passwordMatches);
-          if(!passwordMatches) return res.status(401).json("wrong old password");
-          const salt = await bcrypt.genSaltSync(10);
-          const hashedPassword = await bcrypt.hashSync(newPassword, salt);
+          if (!passwordMatches) return res.status(401).json("wrong old password");
+      
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(newPassword, salt);
           console.log(hashedPassword);
-          ceo.email = req.body.email;
-          ceo.password = hashedPassword;
-          await ceo.save();
-          const ceoPayload = {
-            ...ceo,
-            password: undefined,
+      
+          if (email) {
+            ceo.email = email;
           }
-
+          ceo.password = hashedPassword;
+      
+          await ceo.save();
+      
+          const ceoPayload = {
+            id: ceo._id,
+            email: ceo.email,
+          };
+      
           const token = jwt.sign(ceoPayload, process.env.OUR_SECRET);
-          return res.status(200).json(token);
+          return res.status(200).json({ token });
         } catch (error) {
           console.log(error);
           return res.status(500).json(error);

@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { verifyActiveAgent, verifyDeletionPin, ceoAccessToken, verifyAgentAccessToken, verifyCeoOrObsToken, getCeoAndAgency } = require("../auth/auth");
-const { createAgency, loginAsAgency, getAll,payDebt, getSearchedTickets, deleteAgency, editAgency, getAgenciesInDebt, confirmBookingPayment, getSingleAgency, getAgencyTickets, soldTickets, scanBooking, createScanningToken, getToken, deleteToken, sendBookingAttachment, getAgencySales, makeBookingForCustomers, applyForCollaboration, getAgenciesInTotalDebt, getDebtFromDateToDate, 
+const { createAgency, loginAsAgency, getAll,payDebt, getSearchedTickets, deleteAgency, editAgency, getAgenciesInDebt, confirmBookingPayment, getSingleAgency, getAgencyTickets, soldTickets, scanBooking, createScanningToken, getToken, deleteToken, sendBookingAttachment, getAgencySales, makeBookingForCustomers, applyForCollaboration, getAgenciesInTotalDebt, getDebtFromDateToDate, changePassword, changeEmail, 
  } = require("../controllers/agency-controller");
 const { attachmentUpload, agentUpload } = require('../helpers/multer/multer');
 const { requestLimiter } = require("../auth/limiter");
@@ -23,6 +23,10 @@ router.post('/scan/:bookingID/:agencyID', scanBooking)
 router.post('/booking/create/:sellerID/:ticketID',verifyActiveAgent, makeBookingForCustomers);
 
 router.post('/payment/confirm/:id/:agency_id', confirmBookingPayment);
+
+router.post('/change-password/:id', changePassword)
+
+router.post('/change-email/:id', changeEmail)
 
 // router.post('/attachment/send', attachmentUpload.array('attachments'), sendBookingAttachment)
 
