@@ -191,7 +191,6 @@ module.exports = {
             city: req.body.city || agency.city,
             country: req.body.country || agency.country,
             lines: req.body.lines || agency.lines,
-
           }
     
           const updatedAgency = await Agency.findByIdAndUpdate(req.params.id, editAgency);
