@@ -8,6 +8,7 @@ const Ceo = require("../models/Ceo");
 const { sendAttachmentToAllPassengers, sendAttachmentToOneForAll, generateQRCode } = require("../helpers/mail");
 const mongoose = require("mongoose");
 const City = require("../models/City");
+const Line = require("../models/Line");
 
 
 function calculateAge(birthDate) {
@@ -132,6 +133,7 @@ module.exports = {
                 percentage: req.body.percentage,
                 city:req.body.city,
                 country:req.body.country,
+                lines: req.body.lines,
             })
 
             await newAgency.save();
@@ -187,6 +189,8 @@ module.exports = {
             percentage: req.body.percentage ? req.body.percentage : agency.percentage,
             city: req.body.city || agency.city,
             country: req.body.country || agency.country,
+            lines: req.body.lines || agency.lines,
+
           }
     
           const updatedAgency = await Agency.findByIdAndUpdate(req.params.id, editAgency);
@@ -463,17 +467,24 @@ module.exports = {
       const currentTimeFormatted = moment().tz(europeBerlinTimezone).format('HH:mm');
       const fromDate = moment(req.query.fromDate).tz(europeBerlinTimezone).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
       const toDate = moment(req.query.toDate).tz(europeBerlinTimezone).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-
-
-      console.log({fromDate, toDate})
+      const agency = JSON.parse(req.query.agency);
+      
+      const agencyLines = agency?.lines?.map((line) => line)
+      console.log({agencyLines, fromDate, toDate})
       const distinctTicketIds = await Ticket.distinct('_id', {
         $or: [
           {
             'stops.from.code': req.query.from,
             'stops.to.code': req.query.to,
           }
+        ],
+        $and: [
+          {
+            lineCode: { $in: agencyLines }, 
+          }
         ]
       });
+      
       
       const uniqueTickets = await Ticket.aggregate([
         {

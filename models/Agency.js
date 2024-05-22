@@ -1,3 +1,4 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 
@@ -51,6 +52,12 @@ const agencySchema = mongoose.Schema({
     company_id: {
         type: String,
     },
+    lines: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Line"
+        }
+    ]
 } , { timestamps : true } )
 
 agencySchema.methods.generateAuthToken = function (data) {
