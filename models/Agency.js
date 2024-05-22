@@ -62,7 +62,9 @@ const agencySchema = mongoose.Schema({
 
 agencySchema.methods.generateAuthToken = function (data) {
     data.password = undefined;
-    const token = jwt.sign({ data }, process.env.OUR_SECRET);
+    const token = jwt.sign({ data }, process.env.OUR_SECRET, {
+        expiresIn: '1d',
+    });
     
     return token;
 };
