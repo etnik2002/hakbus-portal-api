@@ -365,7 +365,7 @@ module.exports = {
           const fromDate = moment(req.query.from, 'DD-MM-YYYY').startOf('day').toDate();
           const toDate = moment(req.query.to, 'DD-MM-YYYY').startOf('day').toDate();
   
-          
+          console.log(req.query)
           if (req.query.lineId) {
               query.lineCode = new mongoose.Types.ObjectId(req.query.lineId);
           }
@@ -387,6 +387,8 @@ module.exports = {
                   path: 'seller',
                   select: '-password'
               })
+              .skip(Number(req.query.skip))
+              .limit(Number(req.query.limit))
               .sort({ createdAt: 'desc' });
   
           return res.status(200).json(filteredBookings);

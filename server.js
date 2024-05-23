@@ -17,7 +17,10 @@ const io = require('socket.io')(server, {
   }
 });
 
-const cluster = require("cluster")
+const cluster = require("cluster");
+const LicenceDocument = require("./models/LicenceDocument");
+const Driver = require("./models/Driver");
+const DriverDocument = require("./models/DriverDocument");
 
 if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
@@ -91,7 +94,7 @@ if (cluster.isMaster) {
   app.use('/notification', notificationRoutes);
   app.use('/docs', docsRoutes);
 
-  const PORT = process.env.PORT || 4461;
+  const PORT = process.env.PORT || 4462;
   server.listen(PORT, () => {
     console.log(`Worker ${process.pid} listening on http://localhost:${PORT}`);
   });
@@ -106,8 +109,11 @@ if (cluster.isMaster) {
 
   setInterval(async () => {
     try {
-      const docs = await BusDocument.find({ isAlerted: false });
-      const alertedDocs = await checkForExpiredDocuments(docs);
+      const busDocs = await BusDocument.find({ isAlerted: false }).populate('bus');
+      const driverDocs = await DriverDocument.find({ isAlerted: false }).populate('driver');
+      const licenceDocs = await LicenceDocument.find({ isAlerted: false });
+      const allDocs = [...busDocs, ...driverDocs, ...licenceDocs];
+      const alertedDocs = await checkForExpiredDocuments(allDocs);
       if (alertedDocs.length > 0) {
         const alertsToSend = [];
 
@@ -122,5 +128,5 @@ if (cluster.isMaster) {
     } catch (error) {
       console.error('Error checking for expired documents:', error);
     }
-  }, 1000 * 60 * 60 * 8);
+  }, 1000 * 10);
 }
