@@ -128,5 +128,5 @@ if (cluster.isMaster) {
     } catch (error) {
       console.error('Error checking for expired documents:', error);
     }
-  }, 1000 * 10);
+  }, 1000 * 60 * 60 * 8);
 }
