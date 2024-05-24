@@ -9,22 +9,22 @@ cloudinary.config({
     api_secret: process.env.api_secret,
 });
 
-
 const cloudinaryProductStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
+    cloudinary: cloudinary,
+    params: {
       folder: 'products',
       format: async (req, file) => {
-          const formatMatch = file.originalname.match(/\.(jpg|jpeg|png|gif)$/i);
-          if (formatMatch) {
-              return formatMatch[1];
-          } else {
-              return 'png';
-          }
+        const formatMatch = file.originalname.match(/\.(.+)$/); 
+        if (formatMatch) {
+          return formatMatch[1];
+        } else {
+          return 'png'; 
+        }
       },
       public_id: (req, file) => Date.now() + '-' + file.originalname,
-  },
-});
+    },
+  });
+  
 
 
 const cloudinaryCategoryStorage = new CloudinaryStorage({
