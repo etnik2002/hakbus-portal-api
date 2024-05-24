@@ -412,7 +412,7 @@ module.exports = {
             if(!booking) {
                 return res.status(404).json("Booking not found");
             }
-            res.status(200).json(booking);
+            return res.status(200).json(booking);
             
         } catch (error) {
         }
@@ -420,11 +420,11 @@ module.exports = {
 
     getOnlineBookings: async (req,res) => {
       try {
-        const bookings = await Booking.find({ seller: null, isPaid: true }).populate('ticket');
+        const bookings = await Booking.find({ seller: null, isPaid: true }).populate('ticket').sort({ createdAt: 'desc' });
         return res.status(200).json(bookings);
       } catch (error) {
         console.error('Error fetching bookings:', error);
-        res.status(500).json({ message: `Server error -> ${error}` })
+        return res.status(500).json({ message: `Server error -> ${error}` })
       }
     } ,
 
