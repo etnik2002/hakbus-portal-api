@@ -6,7 +6,7 @@ const driverDocumentSchema = mongoose.Schema({
     expiresAt: { type: Date },
     type: {
         type: String,
-        enum: ['leja', 'leternjoftim', 'kartelatahografis', 'licenca', 'lekarsko']
+        enum: ['leja', 'leternjoftim', 'kartelatahografis', 'licenca', 'lekarsko', "pasaporta"]
     },
     driver: {
         type: mongoose.Schema.Types.ObjectId,
