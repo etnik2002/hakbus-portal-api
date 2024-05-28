@@ -179,6 +179,36 @@ module.exports = {
         }
     },
     
+    deleteDriverDoc: async (req,res) => {
+        try {
+            await DriverDocument.findByIdAndRemove(req.query.id);
+            return res.status(200).json("Success")
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json(error);
+        }
+    },
+    
+    deleteBusDoc: async (req,res) => {
+        try {
+            const deleted = await BusDocument.findByIdAndRemove(req.query.id);
+            console.log(deleted)
+            return res.status(200).json("Success")
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json(error);
+        }
+    },
+    
+    deleteLicenceDoc: async (req,res) => {
+        try {
+            await LicenceDocument.findByIdAndRemove(req.query.id);
+            return res.status(200).json("Success")
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json(error);
+        }
+    },
 
     createBus: async (req,res) => {
         try {
