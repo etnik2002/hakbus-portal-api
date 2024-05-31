@@ -205,10 +205,6 @@ module.exports = {
 
       addCity : async(req,res) => {
         try {
-          const city= await City.find({name:req.body.name})
-          if (city.length>0){
-            return res.status(400).json('Qyteti egziston');
-          }
           const googleMapsUrl = req.body.mapUrl;
 
           const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
