@@ -19,10 +19,10 @@ module.exports = {
         try {
             const validUntilDate = new Date(req.body.validUntil);
             const expiresAtDate = new Date(validUntilDate);
-            console.log({validUntilDate, expiresAtDate})
             expiresAtDate.setDate(validUntilDate.getDate() - (parseInt(req.body.expiresAt) * 7));
-
+            
             const images = Array.isArray(req.files) ? req.files : [req.files || req.file];
+            console.log({validUntilDate, expiresAtDate, images})
             const newDoc = new DriverDocument({
                 images: images.map(file => ({ filename: file.filename, path: file.path })),
                 validUntil: req.body.validUntil,
@@ -66,6 +66,16 @@ module.exports = {
         } catch (error) {
             console.log(error);
             return res.status(500).json(error)  
+        }
+    },
+
+    deleteBus: async (req,res) => {
+        try {
+            const deleted = await Bus.findByIdAndRemove(req.params.id);
+            return res.status(200).json("Sukses")      
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json(error);
         }
     },
 
