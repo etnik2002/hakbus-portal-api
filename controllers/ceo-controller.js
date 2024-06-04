@@ -26,11 +26,11 @@ module.exports = {
 
             await newCeo.save();
 
-            res.status(200).json(`successfully created the new ceo -> ${newCeo}`);
+            return res.status(200).json(`successfully created the new ceo -> ${newCeo}`);
 
         } catch (error) {
             console.error(error);
-            res.status(500).json(error)
+            return res.status(500).json(error)
         }
     },
 
@@ -40,7 +40,7 @@ module.exports = {
         return res.status(200).json(observer);
       } catch (error) {
         console.error(error);
-        res.status(500).json(error)
+        return res.status(500).json(error)
       }
     },
 
@@ -66,7 +66,7 @@ module.exports = {
         return res.status(200).json("Observer saved");
       } catch (error) {
         console.error(error);
-        res.status(500).json(error);
+        return res.status(500).json(error);
       }
     },
 
@@ -91,9 +91,9 @@ module.exports = {
           const token = ceo.generateAuthToken(ceo);
           res.setHeader('Authorization', `Bearer ${token}`);
     
-          res.status(200).json({ data: token, message: "logged in successfully" });
+          return res.status(200).json({ data: token, message: "logged in successfully" });
         } catch (error) {
-          res.status(500).send({ message: "Some error happened" + error });
+          return res.status(500).send({ message: "Some error happened" + error });
         }
       },
 
@@ -102,7 +102,7 @@ module.exports = {
           const obs = await Ceo.aggregate([{$match: { role: 'observer' }}])
           return res.status(200).json(obs)
         } catch (error) {
-          res.status(500).json(error);
+          return res.status(500).json(error);
         }
       },
 
@@ -138,9 +138,9 @@ module.exports = {
       getCeoById: async (req,res) => {
         try {
           const ceo = await Ceo.findById(req.params.id).populate('notifications.agency_id');
-          res.status(200).json(ceo);
+          return res.status(200).json(ceo);
         } catch (error) {
-          res.status(500).json(error);
+          return res.status(500).json(error);
         }
       },
 
@@ -171,7 +171,7 @@ module.exports = {
           const soldTickets = soldTicketsCount.length > 0 ? soldTicketsCount[0].totalSoldTickets : 0;
           const totalActiveCities = activeCities.length > 0 ? activeCities[0].totalActiveCities : 0;
       
-          res.status(200).json({
+          return res.status(200).json({
             allAgencies,
             allTickets: totalTickets,
             soldTickets,
@@ -181,25 +181,25 @@ module.exports = {
             numberOfAgencies,
           });
         } catch (error) {
-          res.status(500).send({ message: 'Some error happened ' + error });
+          return res.status(500).send({ message: 'Some error happened ' + error });
         }
       },
 
       deactivateAgency : async(req,res) => {
           try {
             await Agency.findByIdAndUpdate(req.params.id,{$set:{isActive:false}})
-            res.status(200).json({message: "Succesfully deactivated"})
+            return res.status(200).json({message: "Succesfully deactivated"})
           } catch (error) {
-            res.status(500).send({ message: "Some error happened" + error });
+            return res.status(500).send({ message: "Some error happened" + error });
           }
       },
 
       activateAgency : async(req,res) => {
           try {
             await Agency.findByIdAndUpdate(req.params.id,{$set:{isActive:true, isApplicant: false}})
-            res.status(200).json({message: "Succesfully activated"})
+            return res.status(200).json({message: "Succesfully activated"})
           } catch (error) {
-            res.status(500).send({ message: "Some error happened" + error });
+            return res.status(500).send({ message: "Some error happened" + error });
           }
       },
 
@@ -207,22 +207,12 @@ module.exports = {
         try {
           const googleMapsUrl = req.body.mapUrl;
 
-          const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-          const match = googleMapsUrl.match(regex);
-
-          var latitude = 0;
-          var longitude = 0;
-          if (match) {
-            latitude = match[1];
-            longitude = match[2];
-
-            console.log("Latitude:", latitude);
-            console.log("Longitude:", longitude);
-          } else {
-            console.log("Coordinates not found in the URL");
-          }
-
-
+          var latitude = googleMapsUrl.split(",")[0];
+          var longitude = googleMapsUrl.split(",")[1];
+          
+          console.log("Latitude:", latitude);
+          console.log("Longitude:", longitude);
+         
           const newCity = new City({
             name: req.body.name,
             country: req.body.country,
@@ -233,11 +223,10 @@ module.exports = {
             station: req.body.station
           })
           
-          console.log(newCity)
           await newCity.save();
-          res.status(200).json('New city created')
+          return res.status(200).json('New city created')
         } catch (error) {
-          res.status(500).send({ message: "Some error happened" + error });
+          return res.status(500).send({ message: "Some error happened" + error });
         }
       },
 
@@ -250,16 +239,9 @@ module.exports = {
           }
       
           const googleMapsUrl = req.body.mapUrl;
-          const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-          const match = googleMapsUrl.match(regex);
-          let latitude = 0;
-          let longitude = 0;
-          if (match) {
-            latitude = match[1];
-            longitude = match[2];
-          } else {
-            console.log("Coordinates not found in the URL");
-          }
+
+          var latitude = googleMapsUrl.split(",")[0];
+          var longitude = googleMapsUrl.split(",")[1];
       
           const payload = {
             name: req.body.name || city.name,
@@ -323,7 +305,7 @@ module.exports = {
         } catch (error) {
           
           console.log(error);
-          res.status(500).send({ message: "Some error happened" + error });
+          return res.status(500).send({ message: "Some error happened" + error });
         }
       },
 
@@ -339,10 +321,10 @@ module.exports = {
           ];
       
           const allCities = await City.aggregate(pipeline);
-          res.status(200).json(allCities);
+          return res.status(200).json(allCities);
         } catch (error) {
           console.log(error);
-          res.status(500).send({ message: "Some error happened" + error });
+          return res.status(500).send({ message: "Some error happened" + error });
         }
       },
 
@@ -354,10 +336,10 @@ module.exports = {
       
           const allCities = await City.aggregate(pipeline);
           console.log("req came")
-          res.status(200).json(allCities);
+          return res.status(200).json(allCities);
         } catch (error) {
           console.log(error);
-          res.status(500).send({ message: "Some error happened" + error });
+          return res.status(500).send({ message: "Some error happened" + error });
         }
       },
       
@@ -366,9 +348,9 @@ module.exports = {
       deleteCity: async (req, res) => {
         try {
           const deletCity = await City.findByIdAndRemove(req.params.id);
-          res.status(200).json({ message: "Qyteti u fshi me sukses"});
+          return res.status(200).json({ message: "Qyteti u fshi me sukses"});
         } catch (error) {
-          res.status(500).json("error -> " + error);
+          return res.status(500).json("error -> " + error);
         }
       },
 
@@ -397,7 +379,7 @@ module.exports = {
               return res.status(404).json('Agency not found.');
             }
             await SendConfirmationEmail(agency);
-            res.status(200).json(`Pagesa e borxhit per ${agency.name} me vlere ${debtValue} € u konfirmua me sukses.`);
+            return res.status(200).json(`Pagesa e borxhit per ${agency.name} me vlere ${debtValue} € u konfirmua me sukses.`);
           } catch (error) {
             console.log(error)
             return res.status(500).json(error);
@@ -509,7 +491,7 @@ module.exports = {
 
     } catch (error) {
         console.log({"Erroriiii: ": error})
-        res.status(500).json('error -> ' + error)
+        return res.status(500).json('error -> ' + error)
     }
   },
 
