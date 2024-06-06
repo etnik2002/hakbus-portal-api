@@ -21,6 +21,7 @@ const bookingSchema = mongoose.Schema({
         type: Boolean,
     },
     date: { type: String },
+    departureDate: { type: Date },
     from: { type: String },
     to: { type: String },
     fromCode: { type: String },

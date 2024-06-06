@@ -163,9 +163,10 @@ module.exports = {
             
             startDate = startDate.toISOString();
             endDate = endDate.toISOString();
-          
             console.log({startDate, endDate})
-            const allBookings = await Booking.find({});
+          
+            const allBookings = await Booking.find({ departureDate: { $gte: startDate, $lte: endDate } });
+            console.log({allBookings})
             const allLineIDS = req.query.line.split('-');
             let ticketsWithBookings = [];
     

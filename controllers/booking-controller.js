@@ -166,6 +166,7 @@ module.exports = {
         lineCode: new mongoose.Types.ObjectId(ticket.lineCode._id),
         firstname: req.body.firstname,
         date: findDate(ticket, req.body.from.code, req.body.to.code),
+        departureDate: new Date(findDate(ticket, req.body.from.code, req.body.to.code)),
         from: req.body.from.value,
         to: req.body.to.value,
         fromCode: req.body.from.code,

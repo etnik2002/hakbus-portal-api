@@ -652,7 +652,7 @@ module.exports = {
         return res.status(401).json("Agent not active")
       }
       const ticket = await Ticket.findById(req.params.ticketID).populate("lineCode");
-      const ceo = await Ceo.aggregate([{$match: {}}]);
+      const ceo = await Ceo.find({}).limit(1);
       
       
       let totalPrice = 0;
@@ -675,13 +675,15 @@ module.exports = {
       const agencyPercentage = agency.percentage / 100;
       const agencyEarnings = (totalPrice * agencyPercentage);
       const ourEarnings = totalPrice - agencyEarnings;
-
+      const depDate = new Date(findDate(ticket, req.body.from.code, req.body.to.code))
+      console.log({depDate})
 
       const newBooking = await new Booking({
         seller: agency?._id,
         ticket: req.params.ticketID,
         lineCode: new mongoose.Types.ObjectId(ticket.lineCode._id),
         date: findDate(ticket, req.body.from.code, req.body.to.code),
+        departureDate: depDate,
         from: req.body.from.value,
         to: req.body.to.value,
         fromCode: req.body.from.code,
