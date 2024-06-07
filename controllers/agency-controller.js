@@ -9,6 +9,9 @@ const { sendAttachmentToAllPassengers, sendAttachmentToOneForAll, generateQRCode
 const mongoose = require("mongoose");
 const City = require("../models/City");
 const Line = require("../models/Line");
+const crypto = require("crypto")
+const { sendOTP } = require('../helpers/mail');
+
 
 
 function calculateAge(birthDate) {
@@ -763,4 +766,70 @@ module.exports = {
   }
   },
 
+  
+  sendOtp: async (req, res) => {
+    try {
+        const otp = generateSixDigitNumber();
+        console.log({ otp });
+
+        const user = await Agency.findOne({ email: req.body.email });
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        user.otp = otp;
+        
+        await user.save();
+        await sendOTP(user.email, otp )
+        console.log(user);
+        return res.status(201).json(otp);
+      } catch (error) {
+          console.log(error);
+          return res.status(500).json(error);
+      }
+  },
+
+    checkOtp: async (req,res) => {
+      try {
+        const user = await Agency.findOne({ email: req.body.email }).select('otp');
+        if(user.otp != req.body.otp){
+          return res.status(401).json("Wrong otp");
+        }
+
+        return res.status(200).json(true);
+      } catch (error) {
+        console.log(error);
+        return res.status(500).json(error)
+      }
+    },
+    resetPw: async (req, res) => {
+      try {
+          const hashedPassword = await bcrypt.hash(req.body.password, 10);
+  
+          const user = await Agency.findOne({ email: req.body.email });
+  
+          if (!user) {
+              return res.status(404).json({ error: "User not found" });
+          }
+  
+          user.password = hashedPassword;
+          await user.save();
+  
+          return res.status(200).json("Success");
+      } catch (error) {
+          console.log(error);
+          return res.status(500).json(error);
+      }
+  },
+
+}
+
+
+
+function generateSixDigitNumber() {
+  const min = 100000;
+  const max = 999999;
+  const randomNumber = crypto.randomInt(min, max + 1);
+  return randomNumber;
 }

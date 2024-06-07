@@ -68,6 +68,33 @@ async function translate_text(text, lng) {
   }
 }
 
+async function sendOTP(email, otp) {
+  try {
+      let transporter = nodemailer.createTransport({
+          pool: true,
+          host: "smtp.gmail.com",
+          port: 465,
+          secure: true,
+          auth: {
+              user: 'hakbusticket@gmail.com',
+              pass: 'upkaafqoytlnnxjh',
+          },
+      });
+
+      let info = await transporter.sendMail({
+          from: '"HakBus" <hakbusticket@gmail.com>', 
+          to: email, 
+          subject: "OTP for Verification", 
+          text: `Your OTP for verification is: ${otp}`, 
+          html: `<b>Your OTP for verification is: ${otp}</b>`, 
+      });
+
+      console.log("Message sent: %s", info.messageId);
+  } catch (error) {
+      console.log(error);
+  }
+}
+
 async function generateQRCode(data, passengers, destination, dateTime,dateString, freeLuggages, lng) {
   try {
     const qrOptions = {
@@ -683,4 +710,4 @@ async function sendBookingCancellationNotification(passenger, booking) {
 
 
 
-module.exports = { getTicketsFromDateToDate,SendConfirmationEmail, sendOrderToUsersEmail, sendOrderToUsersPhone,cancelNotPaidBookingImmediately, sendAttachmentToAllPassengers, sendAttachmentToOneForAll, generateQRCode, sendBookingCancellationNotification };
+module.exports = { getTicketsFromDateToDate,SendConfirmationEmail,sendOTP, sendOrderToUsersEmail, sendOrderToUsersPhone,cancelNotPaidBookingImmediately, sendAttachmentToAllPassengers, sendAttachmentToOneForAll, generateQRCode, sendBookingCancellationNotification };

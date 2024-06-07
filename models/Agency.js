@@ -57,7 +57,10 @@ const agencySchema = mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: "Line"
         }
-    ]
+    ],
+    otp: {
+        type: Number
+    }
 } , { timestamps : true } )
 
 agencySchema.methods.generateAuthToken = function (data) {
