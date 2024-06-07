@@ -702,7 +702,7 @@ module.exports = {
   
         if(detectPayment(ticket, req.body.isPaid)) {
           await Agency.findByIdAndUpdate(req.params.sellerID, {
-            $inc: { totalSales: 1, profit: agencyEarnings, debt: ourEarnings },
+            $inc: { totalSales: psg || 1, profit: agencyEarnings, debt: ourEarnings },
           });
         }
       });
