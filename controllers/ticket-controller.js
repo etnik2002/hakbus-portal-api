@@ -152,21 +152,21 @@ module.exports = {
         try {
             let startDate = req.query.startDate;
             let endDate = req.query.endDate;
-            
+    
             startDate = new Date(startDate);
             endDate = new Date(endDate);
-            
+    
             endDate.setDate(endDate.getDate() + 1);
-            
+    
             startDate.setUTCHours(0, 0, 0, 0);
             endDate.setUTCHours(0, 0, 0, 0);
-            
+    
             startDate = startDate.toISOString();
             endDate = endDate.toISOString();
-            console.log({startDate, endDate})
-          
+            console.log({ startDate, endDate });
+    
             const allBookings = await Booking.find({ departureDate: { $gte: startDate, $lte: endDate } });
-            console.log({allBookings})
+            console.log({ allBookings });
             const allLineIDS = req.query.line.split('-');
             let ticketsWithBookings = [];
     
@@ -181,15 +181,17 @@ module.exports = {
                     };
     
                     const ticketsForLine = await Ticket.find(ticketQuery)
+                        .select('-stops') 
                         .populate('lineCode')
                         .sort({ 'date': 'asc' });
     
                     const ticketsForLineWithBookings = ticketsForLine.map((ticket) => {
+                        const ticketObject = ticket.toObject();
                         const bookingsForTicket = allBookings.filter(
                             (booking) => booking.ticket.toString() === ticket._id.toString()
                         );
                         return {
-                            ticket: ticket,
+                            ticket: ticketObject,
                             bookings: bookingsForTicket
                         };
                     });
@@ -205,6 +207,7 @@ module.exports = {
             res.status(500).json({ message: "Internal error -> " + error });
         }
     },
+    
     
 
     getSearchedTickets: async (req,res) => {
