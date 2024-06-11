@@ -58,6 +58,12 @@ const bookingSchema = mongoose.Schema({
             }
         }
     ],
+    map: {
+        startLat: { type: Number },
+        startLng: { type: Number },
+        endLat: { type: Number },
+        endLng: { type: Number },
+    },
     price: {
         type: Number
     },

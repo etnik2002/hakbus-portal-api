@@ -5,7 +5,7 @@ const Booking = require("../models/Booking");
 const bcrypt = require("bcryptjs");
 const Token = require("../models/ScannerToken");
 const Ceo = require("../models/Ceo");
-const { sendAttachmentToAllPassengers, sendAttachmentToOneForAll, generateQRCode } = require("../helpers/mail");
+const { sendAttachmentToAllPassengers, sendAttachmentToOneForAll, generateQRCode, generateQRCodeAgent } = require("../helpers/mail");
 const mongoose = require("mongoose");
 const City = require("../models/City");
 const Line = require("../models/Line");
@@ -91,6 +91,59 @@ const findDate = (ticket, from, to) => {
     return stop.date;
   } else {
     return "Date not found";
+  }
+};
+
+const findStation = (ticket, from, to) => {
+  const stop = ticket?.stops?.find(
+    (s) =>
+      s.from[0]?.code == from &&
+      s.to[0]?.code == to
+  );
+  console.log({stopirje: stop.from[0]})
+  if (stop) {
+    return stop.from[0].city;
+  } else {
+    return "Station not found";
+  }
+};
+
+
+const findStartLat = (ticket,from,to) => {
+  const stop = ticket?.stops?.find(s => s.from.some(cityInfo => cityInfo.code === from));
+  if (stop) {
+    return stop.from[0].lat;
+  } else {
+    return "Start lat not found";
+  }
+};
+
+const findStartLng = (ticket,from,to) => {
+  const stop = ticket?.stops?.find(s => s.from.some(cityInfo => cityInfo.code === from));
+  if (stop) {
+    return stop.from[0].lng;
+  } else {
+    return "Start lng not found";
+  }
+};
+
+const findEndLat = (ticket,from,to) => {
+  const stop = ticket?.stops?.find(s => s.to.some(t => t?.code === to));
+  if (stop && stop.to[0]) {
+    const dest = stop.to.find((s) => s?.code == to)
+    return dest.lat
+  } else {
+    return "End lat not found";
+  }
+};
+
+const findEndLng = (ticket,from,to) => {
+  const stop = ticket?.stops?.find(s => s.to.some(t => t?.code === to));
+  if (stop) {
+    const dest = stop.to.find((s) => s?.code == to)
+    return dest.lng;
+  } else {
+    return "End lng not found";
   }
 };
 
@@ -601,15 +654,15 @@ module.exports = {
     try {
         const { id,agency_id } = req.params;
         const agency = await Agency.findById(agency_id);
-        const booking = await Booking.findByIdAndUpdate(id, { $set: { isPaid: true } });
+        const booking = await Booking.findByIdAndUpdate(id, { $set: { isPaid: true } }).populate("ticket");
         const destination = { from: booking.from, to: booking.to };
         const dateTime = { date: booking.date, time: findTime(booking.ticket, req.body.from, req.body.to) };
-        await generateQRCode(booking._id.toString(), booking.passengers, destination, dateTime, booking.ticket?.lineCode?.freeLuggages, req.body.lng);
+        await generateQRCodeAgent(booking?.map, findStation(booking?.ticket, booking?.fromCode, booking?.toCode), booking._id.toString(), booking.passengers, destination, dateTime, booking.ticket?.lineCode?.freeLuggages, req.body.lng);
         const agencyPercentage = agency.percentage / 100;
         const agencyEarnings = (booking.price * agencyPercentage);
         agency.profit += agencyEarnings;
         const debt = booking.price - agencyEarnings;
-        agency.debt += debt;``
+        agency.debt += debt;
         
         await agency.save();
 
@@ -694,7 +747,13 @@ module.exports = {
         price: totalPrice,
         passengers: passengers,
         isPaid: detectPayment(ticket, req.body.isPaid),
-        agentHasDebt: true
+        agentHasDebt: true,
+        map: {
+          startLat: findStartLat(ticket,req.body.from.code, req.body.to.code),
+          startLng: findStartLng(ticket,req.body.from.code, req.body.to.code),
+          endLat: findEndLat(ticket,req.body.from.code, req.body.to.code),
+          endLng: findEndLng(ticket,req.body.from.code, req.body.to.code),
+        },
       })
 
       await newBooking.save().then(async () => {
@@ -727,9 +786,9 @@ module.exports = {
       const destination = { from: req.body.from.value, to: req.body.to.value };
       const dateTime = { date: ticket.date, time: findTime(ticket, req.body.from.code, req.body.to.code) };
       const dateString = findDate(ticket, req.body.from.code, req.body.to.code)
-
+      
       if(detectPayment(ticket, req.body.isPaid)){
-        await generateQRCode(newBooking._id.toString(), newBooking.passengers, destination, dateTime,new Date(dateString).toDateString(), ticket?.lineCode?.freeLuggages, req.body.lng);
+        await generateQRCodeAgent(newBooking?.map || {}, findStation(ticket, req.body.from.code, req.body.to.code), newBooking._id.toString(), newBooking.passengers, destination, dateTime,new Date(dateString).toDateString(), ticket?.lineCode?.freeLuggages, req.body.lng);
       }
       return res.status(200).json("success");
     } catch (error) {

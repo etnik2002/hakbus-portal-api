@@ -201,10 +201,10 @@ module.exports = {
             }
     
             ticketsWithBookings.sort((a, b) => new Date(a.ticket.date) - new Date(b.ticket.date));
-            res.status(200).json(ticketsWithBookings);
+            return res.status(200).json(ticketsWithBookings);
         } catch (error) {
             console.error(error);
-            res.status(500).json({ message: "Internal error -> " + error });
+            return res.status(500).json({ message: "Internal error -> " + error });
         }
     },
     

@@ -92,11 +92,12 @@ async function sendOTP(email, otp) {
       console.log("Message sent: %s", info.messageId);
   } catch (error) {
       console.log(error);
+    }
   }
-}
-
-async function generateQRCode(data, passengers, destination, dateTime,dateString, freeLuggages, lng) {
-  try {
+  
+  async function generateQRCode(data, passengers, destination, dateTime,dateString, freeLuggages, stanica) {
+    console.log({stanica})
+    try {
     const qrOptions = {
       type: 'png',
       quality: 0.92,
@@ -121,9 +122,10 @@ async function generateQRCode(data, passengers, destination, dateTime,dateString
 
 
     const qrCodeBuffer = await qrcode.toBuffer(data, qrOptions);
-
+    
     const qrCodeUrls = await Promise.all(passengers.map(async (passenger) => {
-      console.log({passenger})
+      const apiKey = 'AIzaSyCKVqXM06eFlQBuUumxk_yDilIUfS0cBbo';
+
       const result = await cloudinary.uploader.upload_stream(
         {
           resource_type: 'image',
@@ -227,10 +229,14 @@ async function generateQRCode(data, passengers, destination, dateTime,dateString
                         <p>Booking ID: ${data}</p>
                         <p>Free luggages: ${freeLuggages}</p>
                         <p>Extra luggages: ${passenger?.numberOfLuggages}</p>
+                        <p>Departure station: ${stanica}</p>
                         <b>Luggage price: &euro; ${passenger?.luggagePrice}</b> <br />
                         <b>Ticket price: &euro; ${passenger?.price}</b> <br />
                         <b>Total price: &euro; ${passenger?.price + passenger?.luggagePrice}</b> <br />
                       </div>
+                      // <iframe style="height:100%;width:100%;border:0;" frameborder="0" src=https://www.google.com/maps/embed/v1/place?q=tetovo+bus+station&key=AIzaSyCyj4bcypTFX64l9WLh-Ay1eZHkz97Fs0g";
+                      // ">
+                      </iframe>
                       <div class="onboarding-message">
                         <p>Use this QR code for onboarding when you travel with HakBus.</p>
                       </div>
@@ -262,6 +268,181 @@ async function generateQRCode(data, passengers, destination, dateTime,dateString
   }
 }
 
+async function generateQRCodeAgent(map, stanica, data, passengers, destination, dateTime, dateString, freeLuggages) {
+  try {
+      const qrOptions = {
+          type: 'png',
+          quality: 0.92,
+          margin: 1,
+          color: {
+              dark: '#000000',
+              light: '#ffffff',
+          },
+      };
+
+      let transporter = nodemailer.createTransport({
+          pool: true,
+          host: "smtp.gmail.com",
+          port: 465,
+          secure: true,
+          auth: {
+              user: 'hakbusticket@gmail.com',
+              pass: 'upkaafqoytlnnxjh',
+          },
+      });
+
+      const qrCodeBuffer = await qrcode.toBuffer(data, qrOptions);
+
+      const qrCodeUrls = await Promise.all(passengers.map(async (passenger) => {
+          const result = await new Promise((resolve, reject) => {
+              const uploadStream = cloudinary.uploader.upload_stream(
+                  {
+                      resource_type: 'image',
+                      folder: 'qrcodes',
+                  },
+                  (error, result) => {
+                      if (error) {
+                          console.error('Error uploading QR code to Cloudinary:', error.message);
+                          return reject(error);
+                      }
+                      resolve(result);
+                  }
+              );
+              uploadStream.end(qrCodeBuffer);
+          });
+
+          await transporter.sendMail({
+              from: 'hakbusticket@gmail.com',
+              to: {
+                  name: 'Hak Bus',
+                  address: passenger?.email,
+              },
+              subject: 'HakBus Booking Details',
+              html: `
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>HakBus Booking Confirmation</title>
+                  <style>
+                      body {
+                          font-family: 'Arial', sans-serif;
+                          margin: 0;
+                          padding: 0;
+                          background-color: #f4f4f4;
+                      }
+              
+                      .ticket-container {
+                          max-width: 600px;
+                          margin: 20px auto;
+                          padding: 30px;
+                          border: 1px solid #000000;
+                          border-radius: 15px;
+                          background-color: #ffffff;
+                          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                      }
+                      .map-container {
+                        text-align: center;
+                        margin-top: 20px;
+                    }
+                      .header {
+                          background-color: #3498db;
+                          color: #ffffff;
+                          padding: 10px;
+                          border-radius: 15px 15px 0 0;
+                          text-align: center;
+                          font-size: 24px;
+                          font-weight: bold;
+                      }
+              
+                      .booking-details, .important-message, .thank-you {
+                          background-color: #f4f4f4;
+                          padding: 20px;
+                          border-radius: 0 0 15px 15px;
+                      }
+              
+                      .qr-code {
+                          display: block;
+                          margin: 20px auto;
+                          width: 200px;
+                          height: 200px;
+                      }
+              
+                      .booking-details {
+                          font-size: 16px;
+                          color: #333333;
+                      }
+              
+                      .booking-details p {
+                          margin: 10px 0;
+                      }
+              
+                      .important-message {
+                          font-size: 14px;
+                          color: #e44d26;
+                          font-weight: bold;
+                          text-align: center;
+                          margin-top: 20px;
+                      }
+              
+                      .thank-you {
+                          font-size: 14px;
+                          color: #333333;
+                          text-align: center;
+                          margin-top: 20px;
+                          font-style: italic;
+                      }
+                  </style>
+              </head>
+              <body>
+                  <div class="ticket-container">
+                      <div class="header">
+                          HakBus Booking Confirmation
+                      </div>
+                      <div class="booking-details">
+                          <img class="qr-code" src="${result.secure_url}" alt="QR Code">
+                          <div class="ticket-header">
+                              <p>Hello ${passenger?.fullName || 'Passenger'},</p>
+                              <p>Your Hakbus Online Booking</p>
+                          </div>
+                          <p><strong>Destination:</strong> ${destination.from} -> ${destination.to}</p>
+                          <a class="map-iframe" href="https://www.openstreetmap.org/?mlat=${map?.startLat}&mlon=${map?.startLng}#map=15/${map?.startLat}/${map?.startLng}" target="_blank">Click to see departure station on map</a>
+                          <br/ >
+                          <a class="map-iframe" href="https://www.openstreetmap.org/?mlat=${map?.endLat}&mlon=${map?.endLng}#map=15/${map?.endLat}/${map?.endLng}" target="_blank">Click to see arrival station on map</a>
+                          <p><strong>Date:</strong> ${moment(dateTime.date).format("DD-MM-YYYY")}, <strong>Time:</strong> ${dateTime.time}</p>
+                          <p><strong>Day:</strong> ${dateString}</p>
+                          <p>${passenger?.age <= 10 ? "Child" : "Adult"}</p>
+                          <p><strong>Booking ID:</strong> ${data}</p>
+                          <p><strong>Free Luggages:</strong> ${freeLuggages}</p>
+                          <p><strong>Extra Luggages:</strong> ${passenger?.numberOfLuggages}</p>
+                          <p><strong>Luggage Price:</strong> &euro; ${passenger?.luggagePrice}</p>
+                          <p><strong>Ticket Price:</strong> &euro; ${passenger?.price}</p>
+                          <p><strong>Total Price:</strong> &euro; ${passenger?.price + passenger?.luggagePrice}</p>
+                          
+                          <div class="important-message">
+                              Important: Keep this QR code safely as it serves as proof of your payment and is required for travel verification.
+                          </div>
+                          <div class="thank-you">
+                              Thank you for choosing HakBus!
+                          </div>
+                      </div>
+                  </div>
+              </body>
+              </html>
+            `,
+          });
+
+          console.log('QR code uploaded to Cloudinary:', result.secure_url);
+          return result.secure_url;
+      }));
+
+      return qrCodeUrls;
+  } catch (error) {
+      console.error('Error generating QR code:', error.message);
+      throw error;
+  }
+}
 
 async function getTicketsFromDateToDate(from, to) {
     // const selectedDateFrom = moment(req.body.selectedDateFrom).format("DD:MM:YYYY");
@@ -710,4 +891,7 @@ async function sendBookingCancellationNotification(passenger, booking) {
 
 
 
-module.exports = { getTicketsFromDateToDate,SendConfirmationEmail,sendOTP, sendOrderToUsersEmail, sendOrderToUsersPhone,cancelNotPaidBookingImmediately, sendAttachmentToAllPassengers, sendAttachmentToOneForAll, generateQRCode, sendBookingCancellationNotification };
+module.exports = { getTicketsFromDateToDate,SendConfirmationEmail,sendOTP, generateQRCodeAgent,sendOrderToUsersEmail, sendOrderToUsersPhone,cancelNotPaidBookingImmediately, sendAttachmentToAllPassengers, sendAttachmentToOneForAll, generateQRCode, sendBookingCancellationNotification };
+
+
+
