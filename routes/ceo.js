@@ -10,11 +10,11 @@ router.use(requestLimiter);
 
 // router.post('/attachment/send', attachmentUpload.array('attachments'), sendBookingToEmail)
 
-router.post('/create',verifyCeoOrObsToken, createCeo);
+router.post('/create', createCeo);
 
 router.post('/login', login);
 
-router.get('/observer',verifyCeoOrObsToken, getAllObservers);
+router.get('/observer', getAllObservers);
 
 router.get('/observer/:id', getObserverById);
 

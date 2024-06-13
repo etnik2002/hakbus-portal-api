@@ -6,9 +6,9 @@ const { ceoAccessToken, verifyCeoOrObsToken } = require("../auth/auth");
 router.use(requestLimiter);
 
 
-router.post('/create',verifyCeoOrObsToken, createDriver);
+router.post('/create', createDriver);
 
-router.get('/',verifyCeoOrObsToken, getAllDrivers);
+router.get('/', getAllDrivers);
 
 router.get('/:id', getDriverById);
 
