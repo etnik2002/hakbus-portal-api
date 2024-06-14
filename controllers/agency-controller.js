@@ -453,7 +453,8 @@ module.exports = {
           $gte: req.query.from, 
           $lte: req.query.to 
         },
-        agentHasDebt: true
+        agentHasDebt: true,
+        isPaid: true,
       }).select('price agentHasDebt');
       
       console.log({bookings})
