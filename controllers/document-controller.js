@@ -51,7 +51,9 @@ module.exports = {
 
     getLicenceDocuments: async (req,res) => {
         try {
-            const docs = await LicenceDocument.find({});
+            const page = parseInt(req.query.page) || 1; 
+            const limit = parseInt(req.query.limit) || 15; 
+            const docs = await LicenceDocument.find({}).skip((page - 1) * limit).limit(limit);
             return res.status(200).json(docs)
         } catch (error) {
             console.log(error);
@@ -103,7 +105,9 @@ module.exports = {
 
     getAllBusesDocs: async (req,res) => {
         try {
-            const all = await BusDocument.find({}).populate("bus");
+            const page = parseInt(req.query.page) || 1; 
+            const limit = parseInt(req.query.limit) || 15; 
+            const all = await BusDocument.find({}).populate("bus").skip((page - 1) * limit).limit(limit);
             return res.status(200).json(all)
         } catch (error) {
             console.log(error);
@@ -113,12 +117,19 @@ module.exports = {
 
     getAllDriverDocs: async (req,res) => {
         try {
-            const all = await DriverDocument.find({}).populate("driver");
-            return res.status(200).json(all)
+            const page = parseInt(req.query.page) || 1; 
+            const limit = parseInt(req.query.limit) || 15; 
+            const documents = await DriverDocument.find({})
+                .populate('driver')
+                .skip((page - 1) * limit)
+                .limit(limit);
+    
+            return res.status(200).json(documents);
         } catch (error) {
-            console.log(error);
+            console.error(error);
             return res.status(500).json(error);
         }
+    
     },
 
     importBusDocument: async (req, res) => {

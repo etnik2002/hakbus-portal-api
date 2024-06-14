@@ -89,8 +89,8 @@ module.exports = {
           }
     
           const token = ceo.generateAuthToken(ceo);
-          res.setHeader('Authorization', `Bearer ${token}`);
-    
+          console.log({token})
+
           return res.status(200).json({ data: token, message: "logged in successfully" });
         } catch (error) {
           return res.status(500).send({ message: "Some error happened" + error });
