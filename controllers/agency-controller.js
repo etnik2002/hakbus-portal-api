@@ -501,10 +501,6 @@ module.exports = {
         };
         
         await Ceo.findByIdAndUpdate(ceo[0]._id, { $push: { notifications: newNotification } });
-        // await Agency.findByIdAndUpdate(agency._id, { $inc: { debt: -debt } });
-        // for (const id of bookingIDS) {
-        //   await Booking.findByIdAndUpdate(id, { $set: { agenyHasDebt: false } });
-        // }
 
         return res.status(200).json("debt paid")
     } catch (error) {
