@@ -515,10 +515,6 @@ module.exports = {
 
   getSearchedTickets: async (req,res) => {
     try {
-      let page = Number(req.query.page) || 1;
-      let size = Number(8);
-      const skipCount = (page - 1) * size;
-  
       const europeBerlinTimezone = 'Europe/Berlin';
       const currentDateFormatted = moment().tz(europeBerlinTimezone).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
       const currentTimeFormatted = moment().tz(europeBerlinTimezone).format('HH:mm');
@@ -526,8 +522,7 @@ module.exports = {
       const toDate = moment(req.query.toDate).tz(europeBerlinTimezone).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
       const agency = JSON.parse(req.query.agency);
       
-      const agencyLines = agency?.lines?.map((line) => line)
-      console.log({agencyLines, fromDate, toDate})
+      const agencyLines = agency?.lines?.map((line) => line?.value)
       const distinctTicketIds = await Ticket.distinct('_id', {
         $or: [
           {
@@ -542,7 +537,6 @@ module.exports = {
         ]
       });
       
-      
       const uniqueTickets = await Ticket.aggregate([
         {
           $match: {
@@ -555,12 +549,6 @@ module.exports = {
         {
           $sort: { date: 1 },
         },
-        // {
-        //   $skip: skipCount,
-        // },
-        // {
-        //   $limit: size,
-        // },
       ])
   
       const filteredTickets = uniqueTickets.filter((ticket) => {

@@ -52,12 +52,7 @@ const agencySchema = mongoose.Schema({
     company_id: {
         type: String,
     },
-    lines: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Line"
-        }
-    ],
+    lines: [],
     otp: {
         type: Number
     }
