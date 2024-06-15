@@ -133,6 +133,37 @@ module.exports = {
           return res.status(500).json(error);
         }
       },
+
+      sendOffer: async (req, res) => {
+        try {
+          const { emails, subject, body } = req.body;
+      
+          let transporter = nodemailer.createTransport({
+            pool: true,
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true, 
+            auth: {
+              user: 'hakbusticket@gmail.com',
+              pass: 'upkaafqoytlnnxjh',
+            },
+          });
+      
+          const mailOptions = {
+            from: 'hakbusticket@gmail.com',
+            to: emails.join(','),
+            subject: subject,
+            text: body,
+          };
+      
+          await transporter.sendMail(mailOptions);
+      
+          return res.status(200).json('Email sent successfully to all users!');
+        } catch (error) {
+          console.error('Error sending email:', error);
+          return res.status(500).json({ error: 'Failed to send email', message: error.message });
+        }
+      },
       
 
       getCeoById: async (req,res) => {
