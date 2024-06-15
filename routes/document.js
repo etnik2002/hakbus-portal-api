@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { importDriverDocument, createBus,getAllDriverDocs, importLicenceDocument,getAllBusesDocs,searchDriverDocument, importBusDocument, getBusById, getAllBuses, getDriverDocuments, getBusDocuments, getLicenceDocuments, searchBusDocument, deleteDriverDoc, deleteBusDoc, deleteLicenceDoc, deleteBus } = require("../controllers/document-controller");
+const { importDriverDocument, createBus,getAllDriverDocs, importLicenceDocument,getAllBusesDocs,searchDriverDocument, importBusDocument, getBusById, getAllBuses, getDriverDocuments, getBusDocuments, getLicenceDocuments, searchBusDocument, deleteDriverDoc, deleteBusDoc, deleteLicenceDoc, deleteBus, getAllExpiredDocs } = require("../controllers/document-controller");
 const { productUpload } = require("../helpers/multer/multer");
 
 router.post('/driver/upload/:id',productUpload.array('images'), importDriverDocument);
@@ -21,6 +21,8 @@ router.get('/driver/search', searchDriverDocument)
 router.get('/licence/docs', getLicenceDocuments)
 
 router.post('/bus/create', createBus)
+
+router.get('/expired', getAllExpiredDocs)
 
 router.post('/driver/delete', deleteDriverDoc)
 

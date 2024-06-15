@@ -39,6 +39,38 @@ module.exports = {
         }
     },
 
+    getAllExpiredDocs: async (req, res) => {
+        try {
+            const page = parseInt(req.query.page) || 1; 
+            const limit = parseInt(req.query.limit) || 5; 
+            const dateNow = new Date();
+    
+            const busD = await BusDocument.find({ expiresAt: { $lt: dateNow } })
+                .populate("bus")
+                .skip((page - 1) * limit)
+                .limit(limit);
+    
+            const driversD = await DriverDocument.find({ expiresAt: { $lt: dateNow } })
+                .populate("driver")
+                .skip((page - 1) * limit)
+                .limit(limit);
+    
+            const licenceD = await LicenceDocument.find({ expiresAt: { $lt: dateNow } })
+                .skip((page - 1) * limit)
+                .limit(limit);
+    
+            let allExpiredDocs = [...busD, ...driversD, ...licenceD];
+    
+            allExpiredDocs.sort((a, b) => a.expiresAt - b.expiresAt);
+    
+            return res.status(200).json(allExpiredDocs);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: "Error fetching documents", message: error.message });
+        }
+    },
+    
+
     getDriverDocuments: async (req,res) => {
         try {
             const docs = await DriverDocument.find({ driver: req.params.id });
