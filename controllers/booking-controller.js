@@ -421,8 +421,35 @@ module.exports = {
 
     getOnlineBookings: async (req,res) => {
       try {
-        const bookings = await Booking.find({ seller: null, isPaid: true }).populate('ticket').sort({ createdAt: 'desc' });
-        return res.status(200).json(bookings);
+        let query = { seller: null, isPaid: true };
+        const fromDate = moment(req.query.from, 'DD-MM-YYYY').startOf('day').toDate();
+        const toDate = moment(req.query.to, 'DD-MM-YYYY').startOf('day').toDate();
+
+        console.log(req.query)
+        if (req.query.lineId) {
+            query.lineCode = new mongoose.Types.ObjectId(req.query.lineId);
+        }
+
+        if (req.query.from !== "" && req.query.to !== "" ) {
+            query.createdAt = { $gte: fromDate, $lte: toDate };
+        }
+        console.log({query})
+        const filteredBookings = await Booking.find(query)
+            .populate({
+                path: 'buyer',
+                select: '-password'
+            })
+            .populate({
+                path: 'ticket',
+                populate: { path: 'lineCode' }
+            })
+            .populate({
+                path: 'seller',
+                select: '-password'
+            })
+            .sort({ createdAt: 'desc' });
+
+        return res.status(200).json(filteredBookings);
       } catch (error) {
         console.error('Error fetching bookings:', error);
         return res.status(500).json({ message: `Server error -> ${error}` })
