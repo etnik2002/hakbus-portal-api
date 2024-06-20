@@ -14,9 +14,10 @@ router.post('/cancel-immediately/:id', cancelNotPaidImmediatelyBooking)
 
 router.get('/monthly', getMonthlyBookings);
 
-router.get('/online', getOnlineBookings)
+router.get('/online', getOnlineBookings);
 
-router.post("/delete/:id", deleteBooking)
+router.post("/delete/:id", deleteBooking);
+
 router.get('/filtered', getFilteredBookings);
 
 router.post('/search', getSearchedBooking)

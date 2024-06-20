@@ -228,8 +228,9 @@ module.exports = {
         const agencyEarnings = (deletedBooking.price * agencyPercentage);
         const debt = deletedBooking.price - agencyEarnings;
         console.log({agencyEarnings, debt})
-        await Agency.findByIdAndUpdate(agency?._id, { $inc: { debt: debt, profit: agencyEarnings } });
+        await Agency.findByIdAndUpdate(agency?._id, { $inc: { debt: -debt, profit: -agencyEarnings } });
       }
+      
       if(!deletedBooking) {
         return res.status(404).json("booking not found");
       }
