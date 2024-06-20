@@ -222,6 +222,14 @@ module.exports = {
   deleteBooking: async (req,res)=>{
     try {
       const deletedBooking = await Booking.findByIdAndRemove(req.params.id);
+      if(deletedBooking.seller) {
+        const agency = await Agency.findById(deletedBooking.seller);
+        const agencyPercentage = agency.percentage / 100;
+        const agencyEarnings = (deletedBooking.price * agencyPercentage);
+        const debt = deletedBooking.price - agencyEarnings;
+        console.log({agencyEarnings, debt})
+        await Agency.findByIdAndUpdate(agency?._id, { $inc: { debt: debt, profit: agencyEarnings } });
+      }
       if(!deletedBooking) {
         return res.status(404).json("booking not found");
       }

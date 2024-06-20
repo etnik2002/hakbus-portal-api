@@ -645,11 +645,9 @@ module.exports = {
         await generateQRCodeAgent(booking?.map, findStation(booking?.ticket, booking?.fromCode, booking?.toCode), booking._id.toString(), booking.passengers, destination, dateTime, booking.ticket?.lineCode?.freeLuggages, req.body.lng);
         const agencyPercentage = agency.percentage / 100;
         const agencyEarnings = (booking.price * agencyPercentage);
-        agency.profit += agencyEarnings;
         const debt = booking.price - agencyEarnings;
-        agency.debt += debt;
-        
-        await agency.save();
+        console.log({agencyEarnings, debt})
+        await Agency.findByIdAndUpdate(agency?._id, { $inc: { debt: debt, profit: agencyEarnings } });
 
         return res.status(200).json("Successfully confirmed payment"); 
 
