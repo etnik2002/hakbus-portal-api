@@ -446,7 +446,7 @@ module.exports = {
     try {
       let debt = 0;
       let bookingIDS = [];
-      const agency = await Agency.findById(req.params.id);
+      const agency = await Agency.findById(req.params.id).select('percentage');
       const bookings = await Booking.find({ 
         seller: req.params.id, 
         createdAt: { 
@@ -455,14 +455,14 @@ module.exports = {
         },
         agentHasDebt: true,
         isPaid: true,
-      }).select('price agentHasDebt');
+      }).select('price agentHasDebt seller');
       
-      console.log({bookings})
-
+      
       for (const booking of bookings) {
-          debt += (booking.price) - (booking.price * agency.percentage / 100);
-          bookingIDS.push(booking?._id)
+        debt += (booking.price) - (booking.price * (agency.percentage / 100));
+        bookingIDS.push(booking?._id)
       }
+      console.log({bookings, debt})
       
       return res.status(200).json({data: parseFloat(debt.toFixed(2)), bookingIDS: bookingIDS});
 
