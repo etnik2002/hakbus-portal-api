@@ -52,6 +52,9 @@ if (cluster.isMaster) {
   const ceoRoutes = require("./routes/ceo");
   const notificationRoutes = require("./routes/notification");
   const docsRoutes = require("./routes/document");
+  const bankRoutes = require("./routes/bank");
+
+
   const axios = require("axios");
   var cookieParser = require('cookie-parser');
 
@@ -93,6 +96,7 @@ if (cluster.isMaster) {
   app.use('/line', lineRoutes);
   app.use('/notification', notificationRoutes);
   app.use('/docs', docsRoutes);
+  app.use('/bank', bankRoutes);
 
   const PORT = process.env.PORT || 4462;
   server.listen(PORT, () => {
