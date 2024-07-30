@@ -458,3 +458,56 @@ const generateTicketsForNextTwoYears = async (ticketData, selectedDaysOfWeek) =>
   
   return tickets;
 };
+
+
+const days = [
+  { key: "e diel", value: 1 },
+  { key: "e hene", value: 2 },
+  { key: "e marte", value: 3 },
+  { key: "e merkure", value: 4 },
+  { key: "e enjte", value: 5 },
+  { key: "e premte", value: 6 },
+  { key: "e shtune", value: 7 }
+];
+
+const createFutureTickets = async () => {
+  try {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const latestTicket = await Ticket.findOne().sort({ date: -1 });
+
+    if (!latestTicket) {
+      console.log('No tickets found in the database.');
+      return;
+    }
+
+    const latestTicketDate = new Date(latestTicket.date);
+    const dayOfWeek = latestTicketDate.getUTCDay() + 1
+
+    const futureDate = new Date(latestTicketDate);
+    futureDate.setUTCFullYear(futureDate.getUTCFullYear() + 2);
+
+    while (futureDate.getUTCDay() + 1 !== dayOfWeek) {
+      futureDate.setUTCDate(futureDate.getUTCDate() + 1);
+    }
+
+    const newTicketData = {
+      ...latestTicket.toObject(),
+      _id: undefined,  
+      date: futureDate.toISOString(),
+      stops: latestTicket.stops.map(stop => ({
+        ...stop,
+        date: new Date(new Date(stop.date).getTime() + (futureDate - latestTicketDate)).toISOString(),
+        arrivalTimestamp: new Date(new Date(stop.arrivalTimestamp).getTime() + (futureDate - latestTicketDate)).toISOString(),
+        timestamp: stop.timestamp + (futureDate - latestTicketDate)
+      }))
+    };
+
+    await Ticket.create(newTicketData);
+
+    console.log(`Created a new ticket for ${futureDate.toISOString()}`);
+  } catch (error) {
+    console.error('Error creating future tickets:', error);
+  }
+};
